@@ -11,12 +11,25 @@ from xgboost import XGBRegressor
 
 
 def get_distance(latitude, longitude, del_latitude, del_longitude):
+    """
+    Get distance from start and destination coordinates.
+    :param latitude: latitude coord
+    :param longitude: longitude coord
+    :param del_latitude: destination latitude coord
+    :param del_longitude: destination longitude coord
+    :return: distance in km
+    """
     coord = (latitude, longitude)
     del_coord = (del_latitude, del_longitude)
     return distance.geodesic(coord, del_coord).km
 
 
 def preprocess(df_kek):
+    """
+    Extract features from initial dataframe.
+    :param df_kek: init dataframe
+    :return: preprocessed dataframe
+    """
     df = df_kek.copy()
     df['distance'] = df.apply(
         lambda x: get_distance(x['latitude'], x['longitude'], x['del_latitude'], x['del_longitude']), axis=1)
@@ -25,12 +38,17 @@ def preprocess(df_kek):
 
 
 def mean_absolute_percentage_error(y_true, y_pred):
+    """
+    MAPE metric eval.
+    :param y_true:
+    :param y_pred:
+    :return: MAPE
+    """
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
 
 class WeightedRegressor(BaseEstimator, RegressorMixin):
-
     def __init__(self, weights=None):
         self.weights = weights
 
