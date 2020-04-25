@@ -110,9 +110,9 @@ cat_params = {
     'thread_count': -1
 }
 
-df_train = pd.read_csv('data/train.csv', date_parser=['OrderedDate'])
-df_val = pd.read_csv('data/validation.csv', date_parser=['OrderedDate'])
-df_test = pd.read_csv('data/test.csv', date_parser=['OrderedDate'])
+df_train = pd.read_csv('data/train.csv', parse_dates=['OrderedDate'])
+df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
+df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
 
 X_train = preprocess(df_train)
 y_train = df_train['RTA']
