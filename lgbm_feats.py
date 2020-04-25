@@ -21,10 +21,10 @@ def mean_absolute_percentage_error(y_true, y_pred):
 df_train = pd.read_csv('train.csv', parse_dates=['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived'])
 df_test = pd.read_csv('validation.csv', parse_dates=['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived'])
 
-df_train[['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']] = df_train[df_train.main_id_locality == 338][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=3))
-df_train[['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']] = df_train[df_train.main_id_locality == 22402][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=5))
-df_train[['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']] = df_train[df_train.main_id_locality == 22394][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=4))
-df_train[['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']] = df_train[df_train.main_id_locality == 22406][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=5))
+df_train[df_train.main_id_locality == 338][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=3))
+df_train[df_train.main_id_locality == 22402][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=5))
+df_train[df_train.main_id_locality == 22394][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=4))
+df_train[df_train.main_id_locality == 22406][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=5))
 
 df_train = df_train.drop('Id', axis=1)
 
@@ -51,10 +51,10 @@ df_train['DeltaReady'] = df_train['DeltaReady'].dt.seconds
 df_train['DeltaCollected'] = df_train['DeltaCollected'].dt.seconds
 df_train['DeltaArrived'] = df_train['DeltaArrived'].dt.seconds
 
-df_test[['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']] = df_test[df_test.main_id_locality == 338][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=3))
-df_test[['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']] = df_test[df_test.main_id_locality == 22402][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=5))
-df_test[['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']] = df_test[df_test.main_id_locality == 22394][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=4))
-df_test[['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']] = df_test[df_test.main_id_locality == 22406][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=5))
+df_test[df_test.main_id_locality == 338][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=3))
+df_test[df_test.main_id_locality == 22402][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=5))
+df_test[df_test.main_id_locality == 22394][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=4))
+df_test[df_test.main_id_locality == 22406][['OrderedDate', 'ReadyForCollection', 'ClientCollected', 'GoodArrived']].apply(lambda x: x - timedelta(hours=5))
 
 df_test = df_test.drop('Id', axis=1)
 
