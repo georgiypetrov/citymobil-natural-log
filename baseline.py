@@ -1,10 +1,9 @@
-from loguru import logger
-
 import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor
 from geopy import distance
 from lightgbm import LGBMRegressor
+from loguru import logger
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_X_y, check_array
@@ -125,51 +124,58 @@ cat_params = {
     'thread_count': -1
 }
 
-logger.info('start reading...')
 
-df_train = pd.read_csv('data/train.csv', parse_dates=['OrderedDate'])
-df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
-df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
+def main():
+    logger.info('start reading...')
+    df_train = pd.read_csv('data/train.csv', parse_dates=['OrderedDate'])
+    df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
+    df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
 
-logger.info('end reading')
-logger.info('start preprocessing...')
+    logger.info('end reading')
+    logger.info('start preprocessing...')
 
-X_train = preprocess(df_train)
-y_train = df_train['RTA']
+    X_train = preprocess(df_train)
+    y_train = df_train['RTA']
 
-X_val = preprocess(df_val)
-y_val = df_val['RTA']
+    X_val = preprocess(df_val)
+    y_val = df_val['RTA']
 
-X_test = preprocess(df_test)
+    X_test = preprocess(df_test)
 
-logger.info('end preprocessing.')
+    logger.info('end preprocessing.')
 
-estimators = [
-    ('xgb', XGBRegressor(**xgb_params)),
-    ('lgb', LGBMRegressor(**lgb_params)),
-    ('cat', CatBoostRegressor(**cat_params))
-]
+    estimators = [
+        ('xgb', XGBRegressor(**xgb_params)),
+        ('lgb', LGBMRegressor(**lgb_params)),
+        ('cat', CatBoostRegressor(**cat_params))
+    ]
 
-final_estimator = WeightedRegressor()
+    final_estimator = WeightedRegressor()
 
-stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=5, shuffle=False,
-                            random_state=None)
-steps = [('stack', stack),
-         ('final_estimator', final_estimator)]
-pipe = Pipeline(steps)
+    stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=5, shuffle=False,
+                                random_state=None)
+    steps = [('stack', stack),
+             ('final_estimator', final_estimator)]
+    pipe = Pipeline(steps)
 
-logger.info('start training...')
+    logger.info('start training...')
 
-pipe.fit(X_train, y_train)
+    pipe.fit(X_train, y_train)
 
-logger.info('end training.')
+    logger.info('end training.')
 
-y_pred = pipe.predict(X_val)
-logger.info(f'MAPE on valid: {mean_absolute_percentage_error(y_pred, y_val)}')
+    y_pred = pipe.predict(X_val)
+    logger.info(f'MAPE on valid: {mean_absolute_percentage_error(y_pred, y_val)}')
 
-y_test = pipe.predict(X_test)
-df_test['Prediction'] = y_test
-df_test = df_test[['Id', 'Prediction']]
-df_test.to_csv('data/submission.csv', index=None)
+    y_test = pipe.predict(X_test)
+    df_test['Prediction'] = y_test
+    df_test = df_test[['Id', 'Prediction']]
+    df_test.to_csv('data/submission.csv', index=None)
 
-logger.info('the end!')
+    logger.info('the end!')
+
+
+if __name__ == '__main__':
+    main()
+
+
