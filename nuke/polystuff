@@ -4,4 +4,5 @@ import folium
 
 df = pd.read_csv("../data/train.csv/train.csv")
 
+for r in df.rows:
 
