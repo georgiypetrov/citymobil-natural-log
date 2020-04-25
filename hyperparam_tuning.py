@@ -45,7 +45,7 @@ def objective(params, keker):
 
 
 xgb_space = {
-    'max_depth': hp.quniform('max_depth', 2, 17, 1),
+    'max_depth': hp.quniform('max_depth', 2, 16, 1),
     'colsample_bytree': hp.uniform('colsample_bytree', 0.3, 1.0),
     'subsample': hp.uniform('subsample', 0.3, 1.0),
     'learning_rate': hp.uniform('learning_rate', 0.01, 0.3),
@@ -58,7 +58,7 @@ xgb_space = {
 }
 
 lgb_space = {
-    'max_depth': hp.quniform('max_depth', 2, 17, 1),
+    'max_depth': hp.quniform('max_depth', 2, 16, 1),
     'colsample_bytree': hp.uniform('colsample_bytree', 0.3, 1.0),
     'subsample': hp.uniform('subsample', 0.3, 1.0),
     'learning_rate': hp.uniform('learning_rate', 0.01, 0.3),
@@ -70,7 +70,7 @@ lgb_space = {
 }
 
 cat_space = {
-    'max_depth': hp.quniform('max_depth', 2, 17, 1),
+    'max_depth': hp.quniform('max_depth', 2, 16, 1),
     'subsample': hp.uniform('subsample', 0.3, 1.0),
     'learning_rate': hp.uniform('learning_rate', 0.01, 0.3),
     'random_state': hp.choice('random_state', [1337]),
