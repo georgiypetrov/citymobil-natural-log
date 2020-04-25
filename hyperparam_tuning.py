@@ -39,7 +39,7 @@ def objective(params, keker):
     pipe.fit(X_train, y_train)
 
     y_pred = pipe.predict(X_val)
-    score = mean_absolute_percentage_error(y_pred, y_val)
+    score = mean_absolute_percentage_error(y_val, y_pred)
     logger.info(f'MAPE on valid: {score}, params: {params}')
     return score
 
