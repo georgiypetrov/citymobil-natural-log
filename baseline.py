@@ -33,7 +33,20 @@ def preprocess(df_kek):
     df = df_kek.copy()
     df['distance'] = df.apply(
         lambda x: get_distance(x['latitude'], x['longitude'], x['del_latitude'], x['del_longitude']), axis=1)
-    df = df[['ETA', 'distance']]
+    df['distance_from_center'] = df.apply(
+        lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['del_latitude'], x['del_longitude']),
+        axis=1)
+    df = pd.concat([df, pd.get_dummies(df['main_id_locality'], prefix='City')], axis=1)
+    df['hour'] = df['OrderedDate'].dt.hour
+    df['dow'] = df['OrderedDate'].dt.dayofweek
+    df = pd.concat([df, pd.get_dummies(df['hour'], prefix='hour')], axis=1)
+    df = pd.concat([df, pd.get_dummies(df['dow'], prefix='dow')], axis=1)
+    df.drop(['Id', 'main_id_locality', 'RTA', 'OrderedDate', 'latitude',
+             'del_latitude', 'longitude', 'del_longitude', 'RDA',
+             'ReadyForCollection', 'ClientCollected', 'GoodArrived',
+             'ready_latitude', 'ready_longitude', 'onway_latitude',
+             'onway_longitude', 'arrived_latitude', 'arrived_longitude',
+             'center_latitude', 'center_longitude', 'route', 'track'], axis=1, inplace=True, errors='ignore')
     return df
 
 
