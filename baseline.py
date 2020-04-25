@@ -108,47 +108,40 @@ class WeightedRegressor(BaseEstimator, RegressorMixin):
 
 
 xgb_params = {
-    'seed': 1337,
-    'colsample_bytree': 1,
-    'silent': 1,
-    'subsample': 0.75,
-    'eta': 0.06,
-    'objective': 'reg:tweedie',
-    'max_depth': 5,
-    'gamma': 0,
-    'num_parallel_tree': 1,
-    'min_child_weight': 1,
-    'tree_methods': 'gpu_hist',
+    'colsample_bytree': 0.6821852734352154,
+    'gamma': 0.4553674559967951,
+    'learning_rate': 0.06310339310159835,
+    'max_depth': 12,
+    'min_child_weight': 2.6876210444837954,
     'n_estimators': 200,
-    'reg_alpha': 0.1,
+    'objective': 'reg:tweedie',
+    'reg_alpha': 0.05950096345795112,
+    'seed': 1337,
+    'subsample': 0.8358148287882489
 }
 
 lgb_params = {
-    'seed': 1337,
-    'colsample_bytree': 1,
-    'silent': 1,
-    'subsample': 0.75,
-    'eta': 0.06,
+    'colsample_bytree': 0.8422252658916799,
+    'learning_rate': 0.0445869385219306,
+    'max_depth': 12,
+    'min_child_weight': 0.4223370679383952,
+    'n_estimators': 280,
     'objective': 'tweedie',
-    'max_depth': 5,
-    'gamma': 0,
-    'min_child_weight': 0.19,
-    'n_estimators': 200,
-    'reg_alpha': 0.1,
-    'n_jobs': -1
+    'reg_alpha': 0.11493392438491513,
+    'seed': 1337,
+    'subsample': 0.752202953524499
 }
 
 cat_params = {
-    'silent': True,
-    'subsample': 0.8,
-    'eta': 0.035,
+    'l2_leaf_reg': 4.002663589178608,
+    'learning_rate': 0.09816790972650707,
+    'max_depth': 12,
+    'n_estimators': 260,
     'objective': 'MAE',
-    'depth': 6,
-    'n_estimators': 200,
     'random_state': 1337,
-    'l2_leaf_reg': 13,
-    'random_strength': 0.0001,
-    'thread_count': -1
+    'random_strength': 0.03565561790725354,
+    'silent': True,
+    'subsample': 0.8274371361968814
 }
 
 
