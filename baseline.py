@@ -105,40 +105,21 @@ class WeightedRegressor(BaseEstimator, RegressorMixin):
 
 
 xgb_params = {
-    'colsample_bytree': 0.6821852734352154,
-    'gamma': 0.4553674559967951,
-    'learning_rate': 0.06310339310159835,
-    'max_depth': 12,
-    'min_child_weight': 2.6876210444837954,
-    'n_estimators': 200,
-    'objective': 'reg:tweedie',
-    'reg_alpha': 0.05950096345795112,
-    'seed': 1337,
-    'subsample': 0.8358148287882489
+    'colsample_bytree': 0.7890864150842599, 'gamma': 0.05404663287513706, 'learning_rate': 0.02934427899673602,
+    'max_depth': 12, 'min_child_weight': 1.76376145852182, 'n_estimators': 180, 'objective': 'reg:tweedie',
+    'reg_alpha': 0.039693131533982774, 'seed': 1337, 'subsample': 0.8783295983009739
 }
 
 lgb_params = {
-    'colsample_bytree': 0.8422252658916799,
-    'learning_rate': 0.0445869385219306,
-    'max_depth': 12,
-    'min_child_weight': 0.4223370679383952,
-    'n_estimators': 280,
-    'objective': 'tweedie',
-    'reg_alpha': 0.11493392438491513,
-    'seed': 1337,
-    'subsample': 0.752202953524499
+    'colsample_bytree': 0.8449687436723844, 'learning_rate': 0.0744244665657087, 'max_depth': 15,
+    'min_child_weight': 1.921203193035535, 'n_estimators': 160, 'objective': 'tweedie',
+    'reg_alpha': 0.062349993873795945, 'seed': 1337, 'subsample': 0.7928740108261731, 'num_leaves': 32768
 }
 
 cat_params = {
-    'l2_leaf_reg': 4.002663589178608,
-    'learning_rate': 0.09816790972650707,
-    'max_depth': 12,
-    'n_estimators': 260,
-    'objective': 'MAE',
-    'random_state': 1337,
-    'random_strength': 0.03565561790725354,
-    'silent': True,
-    'subsample': 0.8274371361968814
+    'l2_leaf_reg': 1.3539377384230196, 'learning_rate': 0.2520401525832272, 'max_depth': 14, 'n_estimators': 90,
+    'objective': 'MAE', 'random_state': 1337, 'random_strength': 0.08231902261750074, 'silent': True,
+    'subsample': 0.7575674870857737
 }
 
 
