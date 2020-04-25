@@ -25,6 +25,37 @@ def get_distance(latitude, longitude, del_latitude, del_longitude):
     return distance.geodesic(coord, del_coord).km
 
 
+def add_time_features(df_kek):
+    """
+    Extract time related features.
+    :param df_kek: init dataframe
+    :return: dataframe with time features
+    """
+    df = pd.DataFrame([])
+    df['hour'] = df_kek['OrderedDate'].dt.hour
+    df['dow'] = df_kek['OrderedDate'].dt.dayofweek
+    df = pd.concat([pd.get_dummies(df['dow'], prefix='dow'), pd.get_dummies(df['hour'], prefix='hour')], axis=1)
+    return df
+
+
+def add_distance_features(df_kek):
+    """
+    Extract distance related features.
+    :param df_kek: init dataframe
+    :return: dataframe with distance features
+    """
+    df = pd.DataFrame([])
+    df['distance'] = df_kek.apply(
+        lambda x: get_distance(x['latitude'], x['longitude'], x['del_latitude'], x['del_longitude']), axis=1)
+    df['distance_dest_from_center'] = df_kek.apply(
+        lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['del_latitude'], x['del_longitude']),
+        axis=1)
+    df['distance_start_from_center'] = df_kek.apply(
+        lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['latitude'], x['longitude']), axis=1)
+    df = pd.concat([df, pd.get_dummies(df_kek['main_id_locality'], prefix='City')], axis=1)
+    return df
+
+
 def preprocess(df_kek):
     """
     Extract features from initial dataframe.
