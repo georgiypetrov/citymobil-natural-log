@@ -62,15 +62,12 @@ def preprocess(df_kek):
     :param df_kek: init dataframe
     :return: preprocessed dataframe
     """
-    df = df_kek.copy()
-    df = pd.concat([df, add_time_features(df)], axis=1)
-    df = pd.concat([df, add_distance_features(df)], axis=1)
-    df.drop(['Id', 'main_id_locality', 'RTA', 'OrderedDate', 'latitude',
-             'del_latitude', 'longitude', 'del_longitude', 'RDA',
-             'ReadyForCollection', 'ClientCollected', 'GoodArrived',
-             'ready_latitude', 'ready_longitude', 'onway_latitude',
-             'onway_longitude', 'arrived_latitude', 'arrived_longitude',
-             'center_latitude', 'center_longitude', 'route', 'track'], axis=1, inplace=True, errors='ignore')
+    df = pd.DataFrame([])
+    df['ETA'] = df_kek['ETA']
+    df['EDA'] = df_kek['EDA']
+    df['ESP'] = df['EDA'] / df['ETA']
+    df = pd.concat([df, add_time_features(df_kek)], axis=1)
+    df = pd.concat([df, add_distance_features(df_kek)], axis=1)
     return df
 
 
