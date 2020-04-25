@@ -149,7 +149,10 @@ def main():
     logger.info('start reading...')
     df_train = pd.read_csv('data/train.csv', parse_dates=['OrderedDate'])
     df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
+    df_test_old = pd.read_csv('data/test_additional.csv', parse_dates=['OrderedDate', 'GoodArrived', 'ClientCollected'])
     df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
+
+    df_test_old['RTA'] = (df_test_old['GoodArrived'] - df_test_old['ClientCollected']).dt.seconds
 
     logger.info('end reading')
     logger.info('start preprocessing...')
@@ -159,6 +162,9 @@ def main():
 
     X_val = preprocess(df_val)
     y_val = df_val['RTA']
+
+    X_test_old = preprocess(df_test_old)
+    y_test_old = df_test_old['RTA']
 
     X_test = preprocess(df_test)
 
@@ -187,6 +193,9 @@ def main():
     y_pred = pipe.predict(X_val)
     logger.info(f'MAPE on valid: {mean_absolute_percentage_error(y_pred, y_val)}')
 
+    y_pred = pipe.predict(X_test_old)
+    logger.info(f'MAPE on old test: {mean_absolute_percentage_error(y_pred, y_test_old)}')
+
     y_test = pipe.predict(X_test)
     df_test['Prediction'] = y_test
     df_test = df_test[['Id', 'Prediction']]
@@ -197,5 +206,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
