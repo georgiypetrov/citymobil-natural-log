@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor
@@ -123,9 +125,14 @@ cat_params = {
     'thread_count': -1
 }
 
+logging.info('start reading...')
+
 df_train = pd.read_csv('data/train.csv', parse_dates=['OrderedDate'])
 df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
 df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
+
+logging.info('end reading')
+logging.info('start preprocessing...')
 
 X_train = preprocess(df_train)
 y_train = df_train['RTA']
@@ -134,6 +141,8 @@ X_val = preprocess(df_val)
 y_val = df_val['RTA']
 
 X_test = preprocess(df_test)
+
+logging.info('end preprocessing.')
 
 estimators = [
     ('xgb', XGBRegressor(**xgb_params)),
@@ -149,12 +158,18 @@ steps = [('stack', stack),
          ('final_estimator', final_estimator)]
 pipe = Pipeline(steps)
 
+logging.info('start training...')
+
 pipe.fit(X_train, y_train)
 
+logging.info('end training.')
+
 y_pred = pipe.predict(X_val)
-print(mean_absolute_percentage_error(y_pred, y_val))
+logging.info(f'MAPE on valid: {mean_absolute_percentage_error(y_pred, y_val)}')
 
 y_test = pipe.predict(X_test)
 df_test['Prediction'] = y_test
 df_test = df_test[['Id', 'Prediction']]
 df_test.to_csv('data/submission.csv', index=None)
+
+logging.info('the end!')
