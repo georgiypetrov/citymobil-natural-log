@@ -169,10 +169,10 @@ def main():
     logger.info('end training.')
 
     y_pred = pipe.predict(X_val)
-    logger.info(f'MAPE on valid: {mean_absolute_percentage_error(y_pred, y_val)}')
+    logger.info(f'MAPE on valid: {mean_absolute_percentage_error(y_val, y_pred)}')
 
     y_pred = pipe.predict(X_test_old)
-    logger.info(f'MAPE on old test: {mean_absolute_percentage_error(y_pred, y_test_old)}')
+    logger.info(f'MAPE on old test: {mean_absolute_percentage_error(y_test_old, y_pred)}')
 
     y_test = pipe.predict(X_test)
     df_test['Prediction'] = y_test
