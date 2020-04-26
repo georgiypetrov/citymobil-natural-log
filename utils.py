@@ -215,20 +215,19 @@ def get_city_idxs():
 
 
 xgb_params = {
-    'colsample_bytree': 0.5301797410622617, 'gamma': 0.14668495067793016,
-    'learning_rate': 0.20536349468140228, 'max_depth': 16, 'min_child_weight': 2.7432782857217655,
-    'n_estimators': 230, 'objective': 'reg:tweedie', 'reg_alpha': 0.22112710555603482, 'seed': 1337,
-    'subsample': 0.9992716172305873
+    'colsample_bytree': 0.7890864150842599, 'gamma': 0.05404663287513706, 'learning_rate': 0.02934427899673602,
+    'max_depth': 12, 'min_child_weight': 1.76376145852182, 'n_estimators': 180, 'objective': 'reg:tweedie',
+    'reg_alpha': 0.039693131533982774, 'seed': 1337, 'subsample': 0.8783295983009739
 }
 
 lgb_params = {
-    'colsample_bytree': 0.770851806404094, 'learning_rate': 0.1293171365711842, 'max_depth': 8,
-    'min_child_weight': 3.694288074910049, 'n_estimators': 230, 'objective': 'mae',
-    'reg_alpha': 0.21311120642722892, 'seed': 1337, 'subsample': 0.46341695004627526, 'num_leaves': 256
+    'colsample_bytree': 0.8449687436723844, 'learning_rate': 0.0744244665657087, 'max_depth': 15,
+    'min_child_weight': 1.921203193035535, 'n_estimators': 160, 'objective': 'tweedie',
+    'reg_alpha': 0.062349993873795945, 'seed': 1337, 'subsample': 0.7928740108261731, 'num_leaves': 32768
 }
 
 cat_params = {
-    'l2_leaf_reg': 0.8989329839485665, 'learning_rate': 0.06323887930914782, 'max_depth': 15,
-    'n_estimators': 230, 'objective': 'MAE', 'random_state': 1337, 'random_strength': 0.017040865775220557,
-    'silent': True, 'subsample': 0.7045725254275295
+    'l2_leaf_reg': 1.3539377384230196, 'learning_rate': 0.2520401525832272, 'max_depth': 14, 'n_estimators': 90,
+    'objective': 'MAE', 'random_state': 1337, 'random_strength': 0.08231902261750074, 'silent': True,
+    'subsample': 0.7575674870857737
 }
