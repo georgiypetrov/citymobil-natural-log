@@ -18,17 +18,17 @@ df_train_old = pd.read_csv('old_data/train.csv', parse_dates=['OrderedDate'])
 df_valid = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
 df_valid_old = pd.read_csv('old_data/validation.csv', parse_dates=['OrderedDate'])
 
-df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
+df_test = pd.read_csv('data/test_additional.csv', parse_dates=['OrderedDate'])
 df_old_test = pd.read_csv('old_data/test_additional.csv', parse_dates=['OrderedDate', 'GoodArrived', 'ClientCollected'])
 df_old_test['RTA'] = (df_old_test['GoodArrived'] - df_old_test['ClientCollected']).dt.seconds.astype('float64')
 
 # Добавляем перекрестки
 try:
     train_crossroads = pd.read_csv('data/train_crossroads.csv')
-    valid_crossroads = pd.read_csv('data/validation_crossroads.csv')
+    valid_crossroads = pd.read_csv('data/valid_crossroads.csv')
     test_crossroads = pd.read_csv('data/test_crossroads.csv')
     train_crossroads_old = pd.read_csv('old_data/train_crossroads.csv')
-    valid_crossroads_old = pd.read_csv('old_data/validation_crossroads.csv')
+    valid_crossroads_old = pd.read_csv('old_data/valid_crossroads.csv')
     test_crossroads_old = pd.read_csv('old_data/test_crossroads.csv')
 
     df_train = merge_crossroads(df_train, train_crossroads)
