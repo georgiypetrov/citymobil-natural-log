@@ -62,11 +62,7 @@ def add_time_features(df_kek):
     df = pd.DataFrame([])
     df['hour'] = df_kek['OrderedDate'].dt.hour
     df['dow'] = df_kek['OrderedDate'].dt.dayofweek
-    df['night'] = (df['hour'] == 23) | (df['hour'] <= 6)
-    df['morning'] = (df['hour'] >= 7) & (df['hour'] <= 10)
-    df['day'] = (df['hour'] >= 11) & (df['hour'] <= 16)
-    df['evening'] = (df['hour'] >= 17) & (df['hour'] <= 22)
-    df = pd.concat([pd.get_dummies(df['dow'], prefix='dow'), df], axis=1)
+    df = pd.concat([pd.get_dummies(df['dow'], prefix='dow'), pd.get_dummies(df['hour'], prefix='hour')], axis=1)
     return df
 
 
@@ -167,7 +163,7 @@ def get_data():
     """
     logger.info('start reading...')
 
-    df_train = pd.read_csv('data/train_with_arrived_error_q90.csv', parse_dates=['OrderedDate'])
+    df_train = pd.read_csv('data/train_with_arrived_error_q80.csv', parse_dates=['OrderedDate'])
     df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
     df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
 
@@ -194,7 +190,7 @@ def get_city_idxs():
     Get city indexes mapping.
     :return: dict with indexes
     """
-    df_train = pd.read_csv('data/train_with_arrived_error_q90.csv', parse_dates=['OrderedDate'])
+    df_train = pd.read_csv('data/train_with_arrived_error_q80.csv', parse_dates=['OrderedDate'])
     df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
     df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
 
@@ -212,9 +208,10 @@ def get_city_idxs():
 
 
 xgb_params = {
-    'colsample_bytree': 0.8352388561415909, 'gamma': 0.2043721253945482, 'learning_rate': 0.06857932105137683,
-    'max_depth': 16, 'min_child_weight': 2.766048148395735, 'n_estimators': 90, 'objective': 'reg:tweedie',
-    'reg_alpha': 0.224422036680493, 'seed': 1337, 'subsample': 0.6769895125085235
+    'colsample_bytree': 0.5301797410622617, 'gamma': 0.14668495067793016,
+    'learning_rate': 0.20536349468140228, 'max_depth': 16, 'min_child_weight': 2.7432782857217655,
+    'n_estimators': 230, 'objective': 'reg:tweedie', 'reg_alpha': 0.22112710555603482, 'seed': 1337,
+    'subsample': 0.9992716172305873
 }
 
 lgb_params = {
@@ -224,7 +221,7 @@ lgb_params = {
 }
 
 cat_params = {
-    'l2_leaf_reg': 4.405217231589936, 'learning_rate': 0.18677256599482014, 'max_depth': 10, 'n_estimators': 80,
-    'objective': 'MAE', 'random_state': 1337, 'random_strength': 0.011276399896596003, 'silent': True,
-    'subsample': 0.653407636532965
+    'l2_leaf_reg': 0.8989329839485665, 'learning_rate': 0.06323887930914782, 'max_depth': 15,
+    'n_estimators': 230, 'objective': 'MAE', 'random_state': 1337, 'random_strength': 0.017040865775220557,
+    'silent': True, 'subsample': 0.7045725254275295
 }
