@@ -11,11 +11,11 @@ from utils import preprocess, xgb_params, lgb_params, cat_params, WeightedRegres
 
 def main():
     logger.info('start reading...')
-    df_train = pd.read_csv('data/train_with_arrived_error_q80.csv', parse_dates=['OrderedDate'])
+    df_train = pd.read_csv('data/train_with_arrived_error_q90.csv', parse_dates=['OrderedDate'])
     df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
     df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
 
-    df_train = df_train.sample(250000, random_state=1337)
+    df_train = pd.concat([df_train, df_val], axis=0)  # remove it if you want true validation score
 
     logger.info('end reading')
     logger.info('start preprocessing...')
@@ -38,7 +38,8 @@ def main():
 
     final_estimator = WeightedRegressor()
 
-    stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=5, shuffle=False, random_state=None)
+    stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=5, shuffle=False,
+                                random_state=None)
     steps = [('stack', stack),
              ('final_estimator', final_estimator)]
     pipe = Pipeline(steps)
