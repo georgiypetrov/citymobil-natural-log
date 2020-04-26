@@ -72,7 +72,7 @@ lgb_space = {
     'subsample': hp.uniform('subsample', 0.3, 1.0),
     'learning_rate': hp.uniform('learning_rate', 0.01, 0.3),
     'seed': hp.choice('seed', [1337]),
-    'objective': hp.choice('objective', ['tweedie']),
+    'objective': hp.choice('objective', ['mae']),
     'n_estimators': hp.quniform('n_estimators', 60, 300, 10),
     'reg_alpha': hp.uniform('reg_alpha', 0.01, 0.3),
     'min_child_weight': hp.uniform('min_child_weight', 0.2, 4),
