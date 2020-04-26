@@ -172,9 +172,9 @@ def get_data(crossroads=False):
 
     df_train = pd.read_csv('data/train_with_arrived_error_q80.csv', parse_dates=['OrderedDate'])
     df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
-    df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
-
     df_train = pd.concat([df_train, df_val], axis=0)  # remove it if you want true validation score
+    df_val = pd.read_csv('data/test_valid.csv', parse_dates=['OrderedDate'])
+    df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
 
     logger.info('end reading')
     logger.info('start preprocessing...')
@@ -199,9 +199,9 @@ def get_city_idxs():
     """
     df_train = pd.read_csv('data/train_with_arrived_error_q80.csv', parse_dates=['OrderedDate'])
     df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
-    df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
-
     df_train = pd.concat([df_train, df_val], axis=0)  # remove it if you want true validation score
+    df_val = pd.read_csv('data/test_valid.csv', parse_dates=['OrderedDate'])
+    df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
 
     idxs = {}
 
