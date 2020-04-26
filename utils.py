@@ -81,7 +81,6 @@ def add_distance_features(df_kek):
         axis=1)
     df['distance_start_from_center'] = df_kek.apply(
         lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['latitude'], x['longitude']), axis=1)
-    df = pd.concat([df, pd.get_dummies(df_kek['main_id_locality'], prefix='City')], axis=1)
     return df
 
 
