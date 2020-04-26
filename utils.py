@@ -74,12 +74,14 @@ def add_distance_features(df_kek):
     :return: dataframe with distance features
     """
     df = pd.DataFrame([])
-    df['distance'] = get_distance(df_kek['latitude'], df_kek['longitude'], df_kek['del_latitude'],
-                                  df_kek['del_longitude'])
-    df['distance_start_from_center'] = get_distance(df_kek['latitude'], df_kek['longitude'], df_kek['center_latitude'],
-                                                    df_kek['center_longitude'])
-    df['distance_dest_from_center'] = get_distance(df_kek['center_latitude'], df_kek['center_longitude'],
-                                                   df_kek['del_latitude'], df_kek['del_longitude'])
+    df['distance'] = df_kek.apply(
+        lambda x: get_distance(x['latitude'], x['longitude'], x['del_latitude'], x['del_longitude']), axis=1)
+    df['distance_dest_from_center'] = df_kek.apply(
+        lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['del_latitude'], x['del_longitude']),
+        axis=1)
+    df['distance_start_from_center'] = df_kek.apply(
+        lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['latitude'], x['longitude']), axis=1)
+    df = pd.concat([df, pd.get_dummies(df_kek['main_id_locality'], prefix='City')], axis=1)
     return df
 
 
