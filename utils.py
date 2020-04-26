@@ -102,8 +102,9 @@ def add_crossroads(df_kek, name):
 def preprocess(df_kek, name=None):
     """
     Extract features from initial dataframe.
-    :param df_kek: init dataframe
-    :return: preprocessed dataframe
+    :param df_kek: init dataframe.
+    :param name: name of dataset.
+    :return: preprocessed dataframe.
     """
     if not name:
         raise AttributeError('Cannot find dataset name!')
