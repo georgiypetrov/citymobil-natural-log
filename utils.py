@@ -90,7 +90,7 @@ def add_crossroads(df_kek, name):
     :return: dataframe with distance features
     """
 
-    crossroads = pd.read_csv(f'data/{name}_crossroads.csv')
+    crossroads = pd.read_csv(f'data/{name}_crossroads.csv').drop_duplicates(subset=['Id'])
     df = df_kek.merge(crossroads, on='Id', how='left')
 
     df['p200'].fillna(value=df['p200'].mean(), inplace=True)
