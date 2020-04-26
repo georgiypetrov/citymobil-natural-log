@@ -14,7 +14,7 @@ df_old_test['RTA'] = (df_old_test['GoodArrived'] - df_old_test['ClientCollected'
 df_val_new, df_old_test = train_test_split(df_old_test, test_size=0.25, random_state=1337)
 
 df_train_new = pd.concat(
-    [df_train.sample(150000, random_state=1337), df_train_old.sample(150000, random_state=1337), df_valid,
+    [df_train.sample(600000, random_state=1337), df_train_old.sample(30000, random_state=1337), df_valid,
      df_valid_old, df_old_test], axis=0)
 
 df_test_new = df_test
