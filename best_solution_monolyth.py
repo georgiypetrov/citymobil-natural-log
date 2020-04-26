@@ -125,7 +125,7 @@ cat_params = {
 
 def main():
     logger.info('start reading...')
-    df_train = pd.read_csv('data/train_with_arrived_error_q80.csv', parse_dates=['OrderedDate'])
+    df_train = pd.read_csv('data/train.csv', parse_dates=['OrderedDate'])
     df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
     df_train = pd.concat([df_train, df_val], axis=0)
     df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
