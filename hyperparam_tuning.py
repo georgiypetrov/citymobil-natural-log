@@ -1,7 +1,7 @@
 from functools import partial
 
 import fire
-import joblib
+import pandas as pd
 from catboost import CatBoostRegressor
 from hyperopt import hp, fmin, tpe
 from lightgbm import LGBMRegressor
@@ -10,9 +10,16 @@ from sklearn.pipeline import Pipeline
 from vecstack import StackingTransformer
 from xgboost import XGBRegressor
 
-from baseline import mean_absolute_percentage_error, WeightedRegressor
+from baseline import mean_absolute_percentage_error, WeightedRegressor, preprocess
 
-X_train, y_train, X_val, y_val = joblib.load('train_val_data')
+df_train = pd.read_csv('data/train.csv', parse_dates=['OrderedDate'])
+df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
+
+X_train = preprocess(df_train)
+y_train = df_train['RTA']
+
+X_val = preprocess(df_val)
+y_val = df_val['RTA']
 
 
 def objective(params, keker):
