@@ -104,6 +104,8 @@ def process_road(name_train, name_test, name_val, points_from_csv = True):
     df_test = pd.read_csv(name_test)
     df_val = pd.read_csv(name_val)
 
+    cities = set()
+
     def citylist_from_df(_df):
         citylist = defaultdict(list)
 
@@ -112,14 +114,13 @@ def process_road(name_train, name_test, name_val, points_from_csv = True):
         for i in range(ROWS):
             if (i % 1000 == 0):
                 print(i//1000)
+            cities.add(city)
             rw = _df.iloc[i]
             city = rw.main_id_locality
             citylist[city].append(i)
 
         print("built citylist")
         return citylist
-
-    cities = [1078, 22390, 22430, 22438]
 
     citylist = citylist_from_df(df_train)
     citylist_test = citylist_from_df(df_test)
