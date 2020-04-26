@@ -82,23 +82,6 @@ def add_distance_features(df_kek):
     return df
 
 
-def add_crossroads(df_kek, name):
-    """
-    Read crossroads file and merge it to given df.
-    :param df_kek: init dataframe
-    :param name: name of dataset.
-    :return: dataframe with distance features
-    """
-
-    crossroads = pd.read_csv(f'data/{name}_crossroads.csv').drop_duplicates(subset=['Id'])
-    df = df_kek.merge(crossroads, on='Id', how='left')
-
-    df['p200'].fillna(value=df['p200'].mean(), inplace=True)
-    df['p500'].fillna(value=df['p500'].mean(), inplace=True)
-    df['p1000'].fillna(value=df['p1000'].mean(), inplace=True)
-    return df
-
-
 def preprocess(df_kek, crossroads=False, name=None):
     """
     Extract features from initial dataframe.
@@ -117,12 +100,10 @@ def preprocess(df_kek, crossroads=False, name=None):
     df = pd.concat([df, add_time_features(set_time_by_timezone(df_kek))], axis=1)
     df = pd.concat([df, add_distance_features(df_kek)], axis=1)
 
-    if crossroads:
-        # Добавляем временно `Id`, чтобы правильно смержить перекрестки
-        df['Id'] = df_kek['Id']
-        df = add_crossroads(df, name=name)
-        df.drop(columns=['Id'], inplace=True)
-    logger.info(f'Columns: {df.columns}')
+    if 'p200' in df_kek:
+        df['p200'] = df_kek['p200']
+        df['p500'] = df_kek['p500']
+        df['p1000'] = df_kek['p1000']
     return df
 
 
@@ -167,9 +148,9 @@ def get_data(target='RTA', crossroads=False):
     """
     logger.info('start reading...')
 
-    df_train = pd.read_csv('data/train_with_arrived_error_q80.csv', parse_dates=['OrderedDate'])
-    df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
-    df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
+    df_train = pd.read_csv('data/train_with_cross.csv', parse_dates=['OrderedDate'])
+    df_val = pd.read_csv('data/validation_with_cross.csv', parse_dates=['OrderedDate'])
+    df_test = pd.read_csv('data/test_with_cross.csv', parse_dates=['OrderedDate'])
 
     df_train = pd.concat([df_train, df_val], axis=0)  # remove it if you want true validation score
 
