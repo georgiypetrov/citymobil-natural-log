@@ -102,6 +102,7 @@ def add_distance_features(df_kek):
     df['distance_start_from_center'] = df_kek.apply(
         lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['latitude'], x['longitude']), axis=1)
     df['route_distance'] = df_kek.apply(lambda x: get_route_distance(x['route']), axis=1)
+    df[df['route_distance'] == 0.0] = df['route_distance'].median()
     return df
 
 
