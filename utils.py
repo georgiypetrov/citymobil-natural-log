@@ -160,7 +160,7 @@ class WeightedRegressor(BaseEstimator, RegressorMixin):
         return y
 
 
-def get_data():
+def get_data(target='RTA'):
     """
     Read data and return preprocessed dataframe
     :return: X_train, y_train, X_val, y_val, X_test, Test_ID
@@ -177,16 +177,18 @@ def get_data():
     logger.info('start preprocessing...')
 
     X_train = preprocess(df_train)
-    y_train = df_train['RTA']
+    df_train['RTA_over_ETA'] = df_train['RTA'] / df_train['ETA']
+    y_train = df_train[target]
 
     X_val = preprocess(df_val)
+    df_val['RTA_over_ETA'] = df_val['RTA'] / df_val['ETA']
     y_val = df_val['RTA']
 
     X_test = preprocess(df_test)
 
     logger.info('end preprocessing.')
 
-    return X_train, y_train, X_val, y_val, X_test, df_test['Id']
+    return X_train, y_train, X_val, y_val, X_test, df_test['Id'], df_train['ETA'], df_val['ETA'], df_test['ETA']
 
 
 def get_city_idxs():

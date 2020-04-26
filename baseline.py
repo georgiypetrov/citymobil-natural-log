@@ -11,7 +11,7 @@ from utils import xgb_params, lgb_params, cat_params, WeightedRegressor, mean_ab
 
 
 def main():
-    X_train, y_train, X_val, y_val, X_test, Test_ID = get_data()
+    X_train, y_train, X_val, y_val, X_test, Test_ID, train_eta, val_eta, test_eta = get_data(target='RTA_over_ETA')
 
     estimators = [
         ('xgb', XGBRegressor(**xgb_params)),
@@ -33,16 +33,16 @@ def main():
 
     logger.info('end training.')
 
-    y_pred = pipe.predict(X_val)
+    y_pred = pipe.predict(X_val) * val_eta
     logger.info(f'MAPE on valid: {mean_absolute_percentage_error(y_val, y_pred)}')
 
     y_test = pipe.predict(X_test)
 
     df = pd.DataFrame([])
-    df['Prediction'] = y_test
+    df['Prediction'] = y_test * test_eta
     df['Id'] = Test_ID
     df_test = df[['Id', 'Prediction']]
-    df_test.to_csv('data/submission.csv', index=None)
+    df_test.to_csv('data/submission_ratio.csv', index=None)
 
     logger.info('the end!')
 
