@@ -6,7 +6,6 @@ from loguru import logger
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_X_y, check_array
 
-cities = [1078, 22390, 22430, 22438]
 PROCESSED_DATA = 'processed_data'
 
 
@@ -51,6 +50,10 @@ def set_time_by_timezone(df):
     df = set_city_time_by_timezone(df, 22390, 4)
     df = set_city_time_by_timezone(df, 22430, 4)
     df = set_city_time_by_timezone(df, 22438, 5)
+    df = set_city_time_by_timezone(df, 338, 3)
+    df = set_city_time_by_timezone(df, 22402, 5)
+    df = set_city_time_by_timezone(df, 22406, 5)
+    df = set_city_time_by_timezone(df, 22394, 4)
     return df
 
 
@@ -85,48 +88,25 @@ def add_distance_features(df_kek):
     return df
 
 
-def add_crossroads(df_kek, name):
-    """
-    Read crossroads file and merge it to given df.
-    :param df_kek: init dataframe
-    :param name: name of dataset.
-    :return: dataframe with distance features
-    """
-
-    crossroads = pd.read_csv(f'data/{name}_crossroads.csv')
-    df = df_kek.merge(crossroads, on='Id', how='left')
-
-    df['p200'].fillna(value=df['p200'].mean(), inplace=True)
-    df['p500'].fillna(value=df['p500'].mean(), inplace=True)
-    df['p1000'].fillna(value=df['p1000'].mean(), inplace=True)
-    return df
-
-
-def preprocess(df_kek, crossroads=False, name=None):
+def preprocess(df_kek):
     """
     Extract features from initial dataframe.
     :param df_kek: init dataframe.
-    :param crossroads: True if use crossroads feature
-    :param name: name of dataset.
     :return: preprocessed dataframe.
     """
-    if crossroads and not name:
-        raise AttributeError('Cannot find dataset name!')
     df = pd.DataFrame([])
     df['ETA'] = df_kek['ETA']
     df['EDA'] = df_kek['EDA']
     df['ESP'] = df['EDA'] / df['ETA']
     df['EXZ'] = df['ETA'] / df['EDA']
     df['city_id'] = df_kek['main_id_locality']
+    df['p200'] = df_kek['p200']
+    df['p500'] = df_kek['p500']
+    df['p1000'] = df_kek['p1000']
     df = pd.concat([df, pd.get_dummies(df['city_id'], prefix='city')], axis=1)
     df = pd.concat([df, add_time_features(set_time_by_timezone(df_kek))], axis=1)
     df = pd.concat([df, add_distance_features(df_kek)], axis=1)
 
-    if crossroads:
-        # Добавляем временно `Id`, чтобы правильно смержить перекрестки
-        df['Id'] = df_kek['Id']
-        df = add_crossroads(df, name=name)
-        df.drop(columns=['Id'], inplace=True)
     return df
 
 
@@ -161,59 +141,6 @@ class WeightedRegressor(BaseEstimator, RegressorMixin):
 
         y = np.mean(X, axis=1)
         return y
-
-
-def get_data(crossroads=False, use_old_data=False):
-    """
-    Read data and return preprocessed dataframe
-    :param crossroads: True if use crossroads feature
-    :param use_old_data: True if use old competition feature
-    :return: X_train, y_train, X_val, y_val, X_test, Test_ID
-    """
-    logger.info('start reading...')
-
-    df_train = pd.read_csv('data/train_with_arrived_error_q80.csv', parse_dates=['OrderedDate'])
-    df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
-    df_train = pd.concat([df_train, df_val], axis=0)  # remove it if you want true validation score
-    df_val = pd.read_csv('data/test_valid.csv', parse_dates=['OrderedDate'])
-    df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
-
-    logger.info('end reading')
-    logger.info('start preprocessing...')
-
-    X_train = preprocess(df_train, crossroads)
-    y_train = df_train['RTA']
-
-    X_val = preprocess(df_val, crossroads)
-    y_val = df_val['RTA']
-
-    X_test = preprocess(df_test, crossroads)
-
-    logger.info('end preprocessing.')
-
-    return X_train, y_train, X_val, y_val, X_test, df_test['Id']
-
-
-def get_city_idxs():
-    """
-    Get city indexes mapping.
-    :return: dict with indexes
-    """
-    df_train = pd.read_csv('data/train_with_arrived_error_q80.csv', parse_dates=['OrderedDate'])
-    df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
-    df_train = pd.concat([df_train, df_val], axis=0)  # remove it if you want true validation score
-    df_val = pd.read_csv('data/test_valid.csv', parse_dates=['OrderedDate'])
-    df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
-
-    idxs = {}
-
-    for city in cities:
-        idxs[city] = {
-            'train': df_train['main_id_locality'] == city,
-            'val': df_val['main_id_locality'] == city,
-            'test': df_test['main_id_locality'] == city
-        }
-    return idxs
 
 
 xgb_params = {

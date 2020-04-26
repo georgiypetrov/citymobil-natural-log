@@ -9,7 +9,7 @@ df_valid_old = pd.read_csv('old_data/validation.csv', parse_dates=['OrderedDate'
 
 df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
 df_old_test = pd.read_csv('old_data/test_additional.csv', parse_dates=['OrderedDate', 'GoodArrived', 'ClientCollected'])
-df_old_test['RTA'] = (df_old_test['GoodArrived'] - df_old_test['ClientCollected']).dt.seconds
+df_old_test['RTA'] = (df_old_test['GoodArrived'] - df_old_test['ClientCollected']).dt.seconds.astype('float64')
 
 df_val_new, df_old_test = train_test_split(df_old_test, test_size=0.25, random_state=1337)
 
