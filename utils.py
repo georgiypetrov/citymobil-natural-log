@@ -62,11 +62,7 @@ def add_time_features(df_kek):
     df = pd.DataFrame([])
     df['hour'] = df_kek['OrderedDate'].dt.hour
     df['dow'] = df_kek['OrderedDate'].dt.dayofweek
-    df['night'] = (df['hour'] == 23) | (df['hour'] <= 6)
-    df['morning'] = (df['hour'] >= 7) & (df['hour'] <= 10)
-    df['day'] = (df['hour'] >= 11) & (df['hour'] <= 16)
-    df['evening'] = (df['hour'] >= 17) & (df['hour'] <= 22)
-    df = pd.concat([pd.get_dummies(df['dow'], prefix='dow'), df], axis=1)
+    df = pd.concat([pd.get_dummies(df['dow'], prefix='dow'), pd.get_dummies(df['hour'], prefix='hour')], axis=1)
     return df
 
 
@@ -103,14 +99,15 @@ def add_crossroads(df_kek, name):
     return df
 
 
-def preprocess(df_kek, name=None):
+def preprocess(df_kek, crossroads=False, name=None):
     """
     Extract features from initial dataframe.
     :param df_kek: init dataframe.
+    :param crossroads: True if use crossroads feature
     :param name: name of dataset.
     :return: preprocessed dataframe.
     """
-    if not name:
+    if crossroads and not name:
         raise AttributeError('Cannot find dataset name!')
     df = pd.DataFrame([])
     df['ETA'] = df_kek['ETA']
@@ -120,10 +117,11 @@ def preprocess(df_kek, name=None):
     df = pd.concat([df, add_time_features(set_time_by_timezone(df_kek))], axis=1)
     df = pd.concat([df, add_distance_features(df_kek)], axis=1)
 
-    # Добавляем временно `Id`, чтобы правильно смержить перекрестки
-    df['Id'] = df_kek['Id']
-    df = add_crossroads(df, name=name)
-    df.drop(columns=['Id'], inplace=True)
+    if crossroads:
+        # Добавляем временно `Id`, чтобы правильно смержить перекрестки
+        df['Id'] = df_kek['Id']
+        df = add_crossroads(df, name=name)
+        df.drop(columns=['Id'], inplace=True)
     return df
 
 
@@ -160,9 +158,10 @@ class WeightedRegressor(BaseEstimator, RegressorMixin):
         return y
 
 
-def get_data(target='RTA'):
+def get_data(target='RTA', crossroads=False):
     """
     Read data and return preprocessed dataframe
+    :param crossroads: True if use crossroads feature
     :return: X_train, y_train, X_val, y_val, X_test, Test_ID
     """
     logger.info('start reading...')
@@ -176,15 +175,15 @@ def get_data(target='RTA'):
     logger.info('end reading')
     logger.info('start preprocessing...')
 
-    X_train = preprocess(df_train)
+    X_train = preprocess(df_train, crossroads)
     df_train['RTA_over_ETA'] = df_train['RTA'] / df_train['ETA']
     y_train = df_train[target]
 
-    X_val = preprocess(df_val)
+    X_val = preprocess(df_val, crossroads)
     df_val['RTA_over_ETA'] = df_val['RTA'] / df_val['ETA']
     y_val = df_val['RTA']
 
-    X_test = preprocess(df_test)
+    X_test = preprocess(df_test, crossroads)
 
     logger.info('end preprocessing.')
 
@@ -196,7 +195,7 @@ def get_city_idxs():
     Get city indexes mapping.
     :return: dict with indexes
     """
-    df_train = pd.read_csv('data/train_with_arrived_error_q90.csv', parse_dates=['OrderedDate'])
+    df_train = pd.read_csv('data/train_with_arrived_error_q80.csv', parse_dates=['OrderedDate'])
     df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
     df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
 
@@ -214,9 +213,10 @@ def get_city_idxs():
 
 
 xgb_params = {
-    'colsample_bytree': 0.8352388561415909, 'gamma': 0.2043721253945482, 'learning_rate': 0.06857932105137683,
-    'max_depth': 16, 'min_child_weight': 2.766048148395735, 'n_estimators': 90, 'objective': 'reg:tweedie',
-    'reg_alpha': 0.224422036680493, 'seed': 1337, 'subsample': 0.6769895125085235
+    'colsample_bytree': 0.5301797410622617, 'gamma': 0.14668495067793016,
+    'learning_rate': 0.20536349468140228, 'max_depth': 16, 'min_child_weight': 2.7432782857217655,
+    'n_estimators': 230, 'objective': 'reg:tweedie', 'reg_alpha': 0.22112710555603482, 'seed': 1337,
+    'subsample': 0.9992716172305873
 }
 
 lgb_params = {
@@ -226,7 +226,7 @@ lgb_params = {
 }
 
 cat_params = {
-    'l2_leaf_reg': 4.405217231589936, 'learning_rate': 0.18677256599482014, 'max_depth': 10, 'n_estimators': 80,
-    'objective': 'MAE', 'random_state': 1337, 'random_strength': 0.011276399896596003, 'silent': True,
-    'subsample': 0.653407636532965
+    'l2_leaf_reg': 0.8989329839485665, 'learning_rate': 0.06323887930914782, 'max_depth': 15,
+    'n_estimators': 230, 'objective': 'MAE', 'random_state': 1337, 'random_strength': 0.017040865775220557,
+    'silent': True, 'subsample': 0.7045725254275295
 }
