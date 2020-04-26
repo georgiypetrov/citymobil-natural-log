@@ -120,7 +120,10 @@ def preprocess(df_kek, name=None):
     df = pd.concat([df, add_time_features(set_time_by_timezone(df_kek))], axis=1)
     df = pd.concat([df, add_distance_features(df_kek)], axis=1)
 
+    # Добавляем временно `Id`, чтобы правильно смержить перекрестки
+    df['Id'] = df_kek['Id']
     df = add_crossroads(df, name=name)
+    df.drop(columns=['Id'], inplace=True)
     return df
 
 
