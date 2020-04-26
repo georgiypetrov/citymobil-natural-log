@@ -12,8 +12,9 @@ from xgboost import XGBRegressor
 
 from utils import mean_absolute_percentage_error, WeightedRegressor, preprocess
 
-df_train = pd.read_csv('data/train_with_arrived_error_q90.csv', parse_dates=['OrderedDate'])
-df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
+df_train = pd.read_csv('train.csv', parse_dates=['OrderedDate'])
+df_train = df_train.sample(200000, random_state=1337)
+df_val = pd.read_csv('validation.csv', parse_dates=['OrderedDate'])
 
 X_train = preprocess(df_train)
 y_train = df_train['RTA']
@@ -37,7 +38,8 @@ def objective(params, keker):
 
     final_estimator = WeightedRegressor()
 
-    stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=3, shuffle=False, random_state=None)
+    stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=3, shuffle=False,
+                                random_state=None)
     steps = [('stack', stack),
              ('final_estimator', final_estimator)]
     pipe = Pipeline(steps)
