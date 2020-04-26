@@ -38,8 +38,7 @@ def main():
 
     final_estimator = WeightedRegressor()
 
-    stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=5, shuffle=False,
-                                random_state=1337)
+    stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=5, shuffle=False)
     steps = [('stack', stack),
              ('final_estimator', final_estimator)]
     pipe = Pipeline(steps)
