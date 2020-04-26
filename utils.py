@@ -24,6 +24,25 @@ def get_distance(latitude, longitude, del_latitude, del_longitude):
     return distance.geodesic(coord, del_coord).km
 
 
+def get_fast_distance(lat1, lon1, lat2, lon2):
+    """
+    Get distance from two coordinates.
+    :param lat1: first latitude coord
+    :param lon1: first longitude coord
+    :param lat2: second latitude coord
+    :param lon2: second longitude coord
+    :return: distance in km
+    """
+    KM = 6371.393
+    lat1, lon1, lat2, lon2 = map(np.deg2rad, [lat1, lon1, lat2, lon2])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = np.sin(dlat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
+    c = 2 * np.arcsin(np.sqrt(a))
+    distance = KM * c
+    return distance
+
+
 def get_distance_vector(df, lat, lon, to_lat, to_lon):
     lat_med = df[lat].median()
     lon_med = df[lon].median()
@@ -48,7 +67,7 @@ def get_route_distance(route):
         l = len(dat)
 
         for i in range(1, l):
-            dist += distance.geodesic(dat[i - 1], dat[i]).km
+            dist += get_fast_distance(dat[i - 1][0], dat[i - 1][1], dat[i][0], dat[i][1])
     except TypeError:
         pass
     return dist
