@@ -98,13 +98,10 @@ def preprocess(df_kek):
     df['ETA'] = df_kek['ETA']
     df['EDA'] = df_kek['EDA']
     df['ESP'] = df['EDA'] / df['ETA']
-    df['EXZ'] = df['ETA'] / df['EDA']
-    df['city_id'] = df_kek['main_id_locality']
     if 'p200' in df_kek.columns:
         df['p200'] = df_kek['p200']
         df['p500'] = df_kek['p500']
         df['p1000'] = df_kek['p1000']
-    df = pd.concat([df, pd.get_dummies(df['city_id'], prefix='city')], axis=1)
     df = pd.concat([df, add_time_features(set_time_by_timezone(df_kek))], axis=1)
     df = pd.concat([df, add_distance_features(df_kek)], axis=1)
 
