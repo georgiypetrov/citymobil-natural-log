@@ -86,12 +86,32 @@ def add_distance_features(df_kek):
     return df
 
 
-def preprocess(df_kek):
+def add_crossroads(df_kek, name):
+    """
+    Read crossroads file and merge it to given df.
+    :param df_kek: init dataframe
+    :param name: name of dataset.
+    :return: dataframe with distance features
+    """
+
+    crossroads = pd.read_csv(f'data/{name}_crossroads.csv')
+    df = df_kek.merge(crossroads, on='Id', how='left')
+
+    df['p200'].fillna(value=df['p200'].mean(), inplace=True)
+    df['p500'].fillna(value=df['p500'].mean(), inplace=True)
+    df['p1000'].fillna(value=df['p1000'].mean(), inplace=True)
+    return df
+
+
+def preprocess(df_kek, name=None):
     """
     Extract features from initial dataframe.
-    :param df_kek: init dataframe
-    :return: preprocessed dataframe
+    :param df_kek: init dataframe.
+    :param name: name of dataset.
+    :return: preprocessed dataframe.
     """
+    if not name:
+        raise AttributeError('Cannot find dataset name!')
     df = pd.DataFrame([])
     df['ETA'] = df_kek['ETA']
     df['EDA'] = df_kek['EDA']
@@ -99,6 +119,8 @@ def preprocess(df_kek):
     df['city_id'] = df_kek['main_id_locality']
     df = pd.concat([df, add_time_features(set_time_by_timezone(df_kek))], axis=1)
     df = pd.concat([df, add_distance_features(df_kek)], axis=1)
+
+    df = add_crossroads(df, name=name)
     return df
 
 
