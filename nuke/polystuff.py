@@ -285,3 +285,8 @@ def process_road(name_train, name_test, name_val, points_from_csv = True):
             print("Done {} {}".format(pid, city))
 
 
+
+# "../data/train.csv/train.csv"
+# "../data/test_additional.csv"
+# "../data/validation.csv"
+process_road("../data/train.csv/train.csv", "../data/text_additional.csv", "../data/validation.csv")
