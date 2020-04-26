@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor
-from geopy import distance
 from lightgbm import LGBMRegressor
 from loguru import logger
 from sklearn.base import BaseEstimator, RegressorMixin
@@ -11,18 +10,23 @@ from vecstack import StackingTransformer
 from xgboost import XGBRegressor
 
 
-def get_distance(latitude, longitude, del_latitude, del_longitude):
+def get_distance(lat1, lon1, lat2, lon2):
     """
-    Get distance from start and destination coordinates.
-    :param latitude: latitude coord
-    :param longitude: longitude coord
-    :param del_latitude: destination latitude coord
-    :param del_longitude: destination longitude coord
+    Get distance from two coordinates.
+    :param lat1: first latitude coord
+    :param lon1: first longitude coord
+    :param lat2: second latitude coord
+    :param lon2: second longitude coord
     :return: distance in km
     """
-    coord = (latitude, longitude)
-    del_coord = (del_latitude, del_longitude)
-    return distance.geodesic(coord, del_coord).km
+    KM = 6371.393
+    lat1, lon1, lat2, lon2 = map(np.deg2rad, [lat1, lon1, lat2, lon2])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = np.sin(dlat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
+    c = 2 * np.arcsin(np.sqrt(a))
+    distance = KM * c
+    return distance
 
 
 def add_time_features(df_kek):
@@ -45,14 +49,12 @@ def add_distance_features(df_kek):
     :return: dataframe with distance features
     """
     df = pd.DataFrame([])
-    df['distance'] = df_kek.apply(
-        lambda x: get_distance(x['latitude'], x['longitude'], x['del_latitude'], x['del_longitude']), axis=1)
-    df['distance_dest_from_center'] = df_kek.apply(
-        lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['del_latitude'], x['del_longitude']),
-        axis=1)
-    df['distance_start_from_center'] = df_kek.apply(
-        lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['latitude'], x['longitude']), axis=1)
-    df = pd.concat([df, pd.get_dummies(df_kek['main_id_locality'], prefix='City')], axis=1)
+    df['distance'] = get_distance(df_kek['latitude'], df_kek['longitude'], df_kek['del_latitude'],
+                                  df_kek['del_longitude'])
+    df['distance_start_from_center'] = get_distance(df_kek['latitude'], df_kek['longitude'], df_kek['center_latitude'],
+                                                    df_kek['center_longitude'])
+    df['distance_dest_from_center'] = get_distance(df_kek['center_latitude'], df_kek['center_longitude'],
+                                                   df_kek['del_latitude'], df_kek['del_longitude'])
     return df
 
 
@@ -165,7 +167,6 @@ def main():
 
     y_pred = pipe.predict(X_val)
     logger.info(f'MAPE on valid: {mean_absolute_percentage_error(y_val, y_pred)}')
-
 
     y_test = pipe.predict(X_test)
     df_test['Prediction'] = y_test
