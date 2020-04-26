@@ -10,9 +10,9 @@ from sklearn.pipeline import Pipeline
 from vecstack import StackingTransformer
 from xgboost import XGBRegressor
 
-from baseline import mean_absolute_percentage_error, WeightedRegressor, preprocess
+from utils import mean_absolute_percentage_error, WeightedRegressor, preprocess
 
-df_train = pd.read_csv('data/train.csv', parse_dates=['OrderedDate'])
+df_train = pd.read_csv('data/train_with_arrived_error_q80.csv', parse_dates=['OrderedDate'])
 df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
 
 df_train = df_train.sample(250000, random_state=1337)
