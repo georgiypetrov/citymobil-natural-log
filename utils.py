@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import numpy as np
 import pandas as pd
+import polyline
 from geopy import distance
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_X_y, check_array
@@ -21,6 +22,25 @@ def get_distance(latitude, longitude, del_latitude, del_longitude):
     coord = (latitude, longitude)
     del_coord = (del_latitude, del_longitude)
     return distance.geodesic(coord, del_coord).km
+
+
+def get_route_distance(route):
+    """
+    Get route distance
+    :param route: route
+    :return: distance in km
+    """
+    dist = 0.0
+
+    try:
+        dat = polyline.decode(route)
+        l = len(dat)
+
+        for i in range(1, l):
+            dist += distance.geodesic(dat[i - 1], dat[i]).km
+    except TypeError:
+        pass
+    return dist
 
 
 def set_city_time_by_timezone(df, city_id, hour_diff):
@@ -81,6 +101,7 @@ def add_distance_features(df_kek):
         axis=1)
     df['distance_start_from_center'] = df_kek.apply(
         lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['latitude'], x['longitude']), axis=1)
+    df['route_distance'] = df_kek.apply(lambda x: get_route_distance(x['route']), axis=1)
     return df
 
 
@@ -98,6 +119,7 @@ def preprocess(df_kek):
         df['p200'] = df_kek['p200']
         df['p500'] = df_kek['p500']
         df['p1000'] = df_kek['p1000']
+    df['route_num'] = df_kek['route'].apply(lambda x: 0 if pd.isna(x) else len(polyline.decode(x)))
     df = pd.concat([df, add_time_features(set_time_by_timezone(df_kek))], axis=1)
     df = pd.concat([df, add_distance_features(df_kek)], axis=1)
 
