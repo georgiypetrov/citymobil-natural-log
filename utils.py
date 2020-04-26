@@ -23,6 +23,17 @@ def get_distance(latitude, longitude, del_latitude, del_longitude):
     return distance.geodesic(coord, del_coord).km
 
 
+def get_distance_vector(df, lat, lon, to_lat, to_lon):
+    lat_med = df[lat].median()
+    lon_med = df[lon].median()
+    lat_coef = get_distance(lat_med, lon_med, lat_med + 1, lon_med)
+    lon_coef = get_distance(lat_med, lon_med, lat_med, lon_med + 1)
+    lat_in_km = (df[lat] - df[to_lat]) * lat_coef
+    lon_in_km = (df[lon] - df[to_lon]) * lon_coef
+    distance_vector = np.sqrt(lat_in_km ** 2 + lon_in_km ** 2)
+    return distance_vector
+
+
 def set_city_time_by_timezone(df, city_id, hour_diff):
     """
     Shift time by timezone to city data
@@ -74,13 +85,11 @@ def add_distance_features(df_kek):
     :return: dataframe with distance features
     """
     df = pd.DataFrame([])
-    df['distance'] = df_kek.apply(
-        lambda x: get_distance(x['latitude'], x['longitude'], x['del_latitude'], x['del_longitude']), axis=1)
-    df['distance_dest_from_center'] = df_kek.apply(
-        lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['del_latitude'], x['del_longitude']),
-        axis=1)
-    df['distance_start_from_center'] = df_kek.apply(
-        lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['latitude'], x['longitude']), axis=1)
+    df['distance'] = get_distance_vector(df_kek, 'latitude', 'longitude', 'del_latitude', 'del_longitude')
+    df['distance_dest_from_center'] = get_distance_vector(df_kek, 'center_latitude', 'center_longitude',
+                                                          'del_latitude', 'del_longitude')
+    df['distance_start_from_center'] = get_distance_vector(df_kek, 'center_latitude', 'center_longitude',
+                                                           'latitude', 'longitude')
     return df
 
 
