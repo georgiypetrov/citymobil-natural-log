@@ -215,9 +215,9 @@ xgb_params = {
 }
 
 lgb_params = {
-    'colsample_bytree': 0.7091469058999612, 'learning_rate': 0.07251773698080877, 'max_depth': 8,
-    'min_child_weight': 0.7681687439259843, 'n_estimators': 260, 'objective': 'mae',
-    'reg_alpha': 0.10756807176613815, 'seed': 1337, 'subsample': 0.30374315411765795, 'num_leaves': 256
+    'colsample_bytree': 0.770851806404094, 'learning_rate': 0.1293171365711842, 'max_depth': 8,
+    'min_child_weight': 3.694288074910049, 'n_estimators': 230, 'objective': 'mae',
+    'reg_alpha': 0.21311120642722892, 'seed': 1337, 'subsample': 0.46341695004627526, 'num_leaves': 256
 }
 
 cat_params = {
