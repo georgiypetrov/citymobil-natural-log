@@ -37,7 +37,7 @@ def objective(params, keker):
 
     final_estimator = WeightedRegressor()
 
-    stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=3, shuffle=False)
+    stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=3, shuffle=False, random_state=None)
     steps = [('stack', stack),
              ('final_estimator', final_estimator)]
     pipe = Pipeline(steps)
