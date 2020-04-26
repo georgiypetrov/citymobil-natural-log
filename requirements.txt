@@ -1,6 +1,5 @@
 catboost==0.23
 fire==0.3.1
-geopy==1.21.0
 numpy==1.18.3
 lightgbm==2.3.1
 loguru==0.4.1
