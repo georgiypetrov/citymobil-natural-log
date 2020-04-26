@@ -1,8 +1,8 @@
 # Citymobil-natural-log-solution
-Solution of hackmipt hackhathon citymobil track
+Решение хакатона от hackmipt[https://hackmipt.com/]. Трек от Ситимобил.
 
 # 1. Соревнование
-Необходимо было предсказать ожидаемое время поездки такси по начальным данным.
+Необходимо предсказать ожидаемое время поездки такси по данным, имеющимся в момент, когда пользователь нажал кнопку "Заказать".
  
 Соревнование на каггле - https://www.kaggle.com/c/final-etarta/leaderboard
 
