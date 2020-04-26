@@ -20,7 +20,7 @@ estimators = [
 
 final_estimator = WeightedRegressor()
 
-stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=5, shuffle=False,
+stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=10, shuffle=False,
                             random_state=None)
 steps = [('stack', stack),
          ('final_estimator', final_estimator)]
