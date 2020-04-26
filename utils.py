@@ -175,15 +175,15 @@ def get_data(target='RTA', crossroads=False):
     logger.info('end reading')
     logger.info('start preprocessing...')
 
-    X_train = preprocess(df_train, crossroads)
+    X_train = preprocess(df_train, crossroads, name='train')
     df_train['RTA_over_ETA'] = df_train['RTA'] / df_train['ETA']
     y_train = df_train[target]
 
-    X_val = preprocess(df_val, crossroads)
+    X_val = preprocess(df_val, crossroads, name='validation')
     df_val['RTA_over_ETA'] = df_val['RTA'] / df_val['ETA']
     y_val = df_val['RTA']
 
-    X_test = preprocess(df_test, crossroads)
+    X_test = preprocess(df_test, crossroads, name='test')
 
     logger.info('end preprocessing.')
 
