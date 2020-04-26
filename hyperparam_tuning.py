@@ -15,6 +15,8 @@ from baseline import mean_absolute_percentage_error, WeightedRegressor, preproce
 df_train = pd.read_csv('data/train.csv', parse_dates=['OrderedDate'])
 df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
 
+df_train = df_train.sample(250000, random_state=1337)
+
 X_train = preprocess(df_train)
 y_train = df_train['RTA']
 
@@ -52,16 +54,16 @@ def objective(params, keker):
 
 
 xgb_space = {
-    'max_depth': hp.quniform('max_depth', 2, 16, 1),
-    'colsample_bytree': hp.uniform('colsample_bytree', 0.3, 1.0),
-    'subsample': hp.uniform('subsample', 0.3, 1.0),
-    'learning_rate': hp.uniform('learning_rate', 0.01, 0.3),
-    'gamma': hp.uniform('gamma', 0.0, 1),
-    'seed': hp.choice('seed', [1337]),
-    'objective': hp.choice('objective', ['reg:tweedie']),
-    'n_estimators': hp.quniform('n_estimators', 60, 300, 10),
-    'reg_alpha': hp.uniform('reg_alpha', 0.01, 0.3),
-    'min_child_weight': hp.uniform('min_child_weight', 0.2, 4),
+    'colsample_bytree': 0.9957950833423739,
+    'gamma': 0.9890937928764717,
+    'learning_rate': 0.02661201974949031,
+    'max_depth': 13,
+    'min_child_weight': 1.2145058849488062,
+    'n_estimators': 230,
+    'objective': 'reg:tweedie',
+    'reg_alpha': 0.1377712027161633,
+    'seed': 1337,
+    'subsample': 0.9298354406857103
 }
 
 lgb_space = {
