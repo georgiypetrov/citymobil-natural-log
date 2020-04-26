@@ -54,16 +54,15 @@ def objective(params, keker):
 
 
 xgb_space = {
-    'colsample_bytree': 0.9957950833423739,
-    'gamma': 0.9890937928764717,
-    'learning_rate': 0.02661201974949031,
-    'max_depth': 13,
-    'min_child_weight': 1.2145058849488062,
-    'n_estimators': 230,
-    'objective': 'reg:tweedie',
-    'reg_alpha': 0.1377712027161633,
-    'seed': 1337,
-    'subsample': 0.9298354406857103
+    'max_depth': hp.quniform('max_depth', 2, 16, 1),
+    'colsample_bytree': hp.uniform('colsample_bytree', 0.3, 1.0),
+    'subsample': hp.uniform('subsample', 0.3, 1.0),
+    'learning_rate': hp.uniform('learning_rate', 0.01, 0.3),
+    'seed': hp.choice('seed', [1337]),
+    'objective': hp.choice('objective', ['tweedie']),
+    'n_estimators': hp.quniform('n_estimators', 60, 300, 10),
+    'reg_alpha': hp.uniform('reg_alpha', 0.01, 0.3),
+    'min_child_weight': hp.uniform('min_child_weight', 0.2, 4),
 }
 
 lgb_space = {
