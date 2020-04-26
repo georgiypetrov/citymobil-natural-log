@@ -122,6 +122,7 @@ def preprocess(df_kek, crossroads=False, name=None):
         df['Id'] = df_kek['Id']
         df = add_crossroads(df, name=name)
         df.drop(columns=['Id'], inplace=True)
+    logger.info(f'Columns: {df.columns}')
     return df
 
 
