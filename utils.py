@@ -65,10 +65,6 @@ def set_time_by_timezone(df):
     df = set_city_time_by_timezone(df, 22390, 4)
     df = set_city_time_by_timezone(df, 22430, 4)
     df = set_city_time_by_timezone(df, 22438, 5)
-    df = set_city_time_by_timezone(df, 338, 3)
-    df = set_city_time_by_timezone(df, 22402, 5)
-    df = set_city_time_by_timezone(df, 22406, 5)
-    df = set_city_time_by_timezone(df, 22394, 4)
     return df
 
 
@@ -103,6 +99,7 @@ def add_distance_features(df_kek):
         lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['latitude'], x['longitude']), axis=1)
     df['route_distance'] = df_kek.apply(lambda x: get_route_distance(x['route']), axis=1)
     df[df['route_distance'] == 0.0] = df['route_distance'].median()
+    df = pd.concat([df, pd.get_dummies(df_kek['main_id_locality'], prefix='City')], axis=1)
     return df
 
 
