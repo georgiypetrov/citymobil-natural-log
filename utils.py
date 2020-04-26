@@ -7,6 +7,7 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_X_y, check_array
 
 cities = [1078, 22390, 22430, 22438]
+PROCESSED_DATA = 'processed_data'
 
 
 def get_distance(lat1, lon1, lat2, lon2):
@@ -162,10 +163,11 @@ class WeightedRegressor(BaseEstimator, RegressorMixin):
         return y
 
 
-def get_data(crossroads=False):
+def get_data(crossroads=False, use_old_data=False):
     """
     Read data and return preprocessed dataframe
     :param crossroads: True if use crossroads feature
+    :param use_old_data: True if use old competition feature
     :return: X_train, y_train, X_val, y_val, X_test, Test_ID
     """
     logger.info('start reading...')
