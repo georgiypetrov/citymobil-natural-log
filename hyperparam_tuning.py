@@ -1,7 +1,7 @@
 from functools import partial
 
 import fire
-import joblib
+import pandas as pd
 from catboost import CatBoostRegressor
 from hyperopt import hp, fmin, tpe
 from lightgbm import LGBMRegressor
@@ -10,9 +10,16 @@ from sklearn.pipeline import Pipeline
 from vecstack import StackingTransformer
 from xgboost import XGBRegressor
 
-from baseline import mean_absolute_percentage_error, WeightedRegressor
+from utils import mean_absolute_percentage_error, WeightedRegressor, preprocess
 
-X_train, y_train, X_val, y_val = joblib.load('train_val_data')
+df_train = pd.read_csv('data/train_with_arrived_error_q90.csv', parse_dates=['OrderedDate'])
+df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
+
+X_train = preprocess(df_train)
+y_train = df_train['RTA']
+
+X_val = preprocess(df_val)
+y_val = df_val['RTA']
 
 
 def objective(params, keker):
@@ -22,16 +29,15 @@ def objective(params, keker):
     if keker is LGBMRegressor:
         params['num_leaves'] = 2 ** params['max_depth']
 
-    clf = keker(**params)
+    reg = keker(**params)
 
     estimators = [
-        ('clf', clf),
+        ('reg', reg),
     ]
 
     final_estimator = WeightedRegressor()
 
-    stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=3, shuffle=False,
-                                random_state=None)
+    stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=3, shuffle=False, random_state=None)
     steps = [('stack', stack),
              ('final_estimator', final_estimator)]
     pipe = Pipeline(steps)
@@ -39,13 +45,13 @@ def objective(params, keker):
     pipe.fit(X_train, y_train)
 
     y_pred = pipe.predict(X_val)
-    score = mean_absolute_percentage_error(y_pred, y_val)
+    score = mean_absolute_percentage_error(y_val, y_pred)
     logger.info(f'MAPE on valid: {score}, params: {params}')
     return score
 
 
 xgb_space = {
-    'max_depth': hp.quniform('max_depth', 2, 17, 1),
+    'max_depth': hp.quniform('max_depth', 2, 16, 1),
     'colsample_bytree': hp.uniform('colsample_bytree', 0.3, 1.0),
     'subsample': hp.uniform('subsample', 0.3, 1.0),
     'learning_rate': hp.uniform('learning_rate', 0.01, 0.3),
@@ -58,19 +64,19 @@ xgb_space = {
 }
 
 lgb_space = {
-    'max_depth': hp.quniform('max_depth', 2, 17, 1),
+    'max_depth': hp.quniform('max_depth', 2, 16, 1),
     'colsample_bytree': hp.uniform('colsample_bytree', 0.3, 1.0),
     'subsample': hp.uniform('subsample', 0.3, 1.0),
     'learning_rate': hp.uniform('learning_rate', 0.01, 0.3),
     'seed': hp.choice('seed', [1337]),
-    'objective': hp.choice('objective', ['tweedie']),
+    'objective': hp.choice('objective', ['mae']),
     'n_estimators': hp.quniform('n_estimators', 60, 300, 10),
     'reg_alpha': hp.uniform('reg_alpha', 0.01, 0.3),
     'min_child_weight': hp.uniform('min_child_weight', 0.2, 4),
 }
 
 cat_space = {
-    'max_depth': hp.quniform('max_depth', 2, 17, 1),
+    'max_depth': hp.quniform('max_depth', 2, 16, 1),
     'subsample': hp.uniform('subsample', 0.3, 1.0),
     'learning_rate': hp.uniform('learning_rate', 0.01, 0.3),
     'random_state': hp.choice('random_state', [1337]),
