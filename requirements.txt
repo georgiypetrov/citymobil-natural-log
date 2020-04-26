@@ -1,8 +1,13 @@
 catboost==0.23
+fire==0.3.1
+geopy==1.21.0
 numpy==1.18.3
 lightgbm==2.3.1
+loguru==0.4.1
 pandas==1.0.3
+polyline==1.4.0
 scikit-learn==0.22.2.post1
 seaborn==0.10.0
+vecstack==0.4.0
 xgboost==1.0.2
-
+hyperopt==0.2.4
