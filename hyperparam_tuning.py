@@ -1,0 +1,118 @@
+from functools import partial
+
+import fire
+import joblib
+from catboost import CatBoostRegressor
+from hyperopt import hp, fmin, tpe
+from lightgbm import LGBMRegressor
+from loguru import logger
+from sklearn.pipeline import Pipeline
+from vecstack import StackingTransformer
+from xgboost import XGBRegressor
+
+from baseline import mean_absolute_percentage_error, WeightedRegressor
+
+X_train, y_train, X_val, y_val = joblib.load('train_val_data')
+
+
+def objective(params, keker):
+    params['max_depth'] = int(params['max_depth'])
+    params['n_estimators'] = int(params['n_estimators'])
+
+    if keker is LGBMRegressor:
+        params['num_leaves'] = 2 ** params['max_depth']
+
+    clf = keker(**params)
+
+    estimators = [
+        ('clf', clf),
+    ]
+
+    final_estimator = WeightedRegressor()
+
+    stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=3, shuffle=False,
+                                random_state=None)
+    steps = [('stack', stack),
+             ('final_estimator', final_estimator)]
+    pipe = Pipeline(steps)
+
+    pipe.fit(X_train, y_train)
+
+    y_pred = pipe.predict(X_val)
+    score = mean_absolute_percentage_error(y_pred, y_val)
+    logger.info(f'MAPE on valid: {score}, params: {params}')
+    return score
+
+
+xgb_space = {
+    'max_depth': hp.quniform('max_depth', 2, 17, 1),
+    'colsample_bytree': hp.uniform('colsample_bytree', 0.3, 1.0),
+    'subsample': hp.uniform('subsample', 0.3, 1.0),
+    'learning_rate': hp.uniform('learning_rate', 0.01, 0.3),
+    'gamma': hp.uniform('gamma', 0.0, 1),
+    'seed': hp.choice('seed', [1337]),
+    'objective': hp.choice('objective', ['reg:tweedie']),
+    'n_estimators': hp.quniform('n_estimators', 60, 300, 10),
+    'reg_alpha': hp.uniform('reg_alpha', 0.01, 0.3),
+    'min_child_weight': hp.uniform('min_child_weight', 0.2, 4),
+}
+
+lgb_space = {
+    'max_depth': hp.quniform('max_depth', 2, 17, 1),
+    'colsample_bytree': hp.uniform('colsample_bytree', 0.3, 1.0),
+    'subsample': hp.uniform('subsample', 0.3, 1.0),
+    'learning_rate': hp.uniform('learning_rate', 0.01, 0.3),
+    'seed': hp.choice('seed', [1337]),
+    'objective': hp.choice('objective', ['tweedie']),
+    'n_estimators': hp.quniform('n_estimators', 60, 300, 10),
+    'reg_alpha': hp.uniform('reg_alpha', 0.01, 0.3),
+    'min_child_weight': hp.uniform('min_child_weight', 0.2, 4),
+}
+
+cat_space = {
+    'max_depth': hp.quniform('max_depth', 2, 17, 1),
+    'subsample': hp.uniform('subsample', 0.3, 1.0),
+    'learning_rate': hp.uniform('learning_rate', 0.01, 0.3),
+    'random_state': hp.choice('random_state', [1337]),
+    'objective': hp.choice('objective', ['MAE']),
+    'silent': hp.choice('silent', [True]),
+    'n_estimators': hp.quniform('n_estimators', 60, 300, 10),
+    'random_strength': hp.uniform('random_strength', 0.00001, 0.1),
+    'l2_leaf_reg': hp.uniform('l2_leaf_reg', 0.1, 10),
+}
+
+xgb_objective = partial(objective, keker=XGBRegressor)
+lgb_objective = partial(objective, keker=LGBMRegressor)
+cat_objective = partial(objective, keker=CatBoostRegressor)
+
+
+def main(regressor, max_evals=100):
+    if regressor not in ['cat', 'xgb', 'lgb']:
+        raise Exception('undefined regressor')
+    best = None
+
+    logger.info(f'start optimizing {regressor}')
+
+    if regressor == 'xgb':
+        best = fmin(fn=xgb_objective,
+                    space=xgb_space,
+                    algo=tpe.suggest,
+                    max_evals=max_evals)
+
+    if regressor == 'lgb':
+        best = fmin(fn=lgb_objective,
+                    space=lgb_space,
+                    algo=tpe.suggest,
+                    max_evals=max_evals)
+
+    if regressor == 'cat':
+        best = fmin(fn=cat_objective,
+                    space=cat_space,
+                    algo=tpe.suggest,
+                    max_evals=max_evals)
+
+    logger.info(best)
+
+
+if __name__ == '__main__':
+    fire.Fire(main)

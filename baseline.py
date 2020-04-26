@@ -3,6 +3,7 @@ import pandas as pd
 from catboost import CatBoostRegressor
 from geopy import distance
 from lightgbm import LGBMRegressor
+from loguru import logger
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_X_y, check_array
@@ -11,25 +12,83 @@ from xgboost import XGBRegressor
 
 
 def get_distance(latitude, longitude, del_latitude, del_longitude):
+    """
+    Get distance from start and destination coordinates.
+    :param latitude: latitude coord
+    :param longitude: longitude coord
+    :param del_latitude: destination latitude coord
+    :param del_longitude: destination longitude coord
+    :return: distance in km
+    """
     coord = (latitude, longitude)
     del_coord = (del_latitude, del_longitude)
     return distance.geodesic(coord, del_coord).km
 
 
-def preprocess(df_kek):
-    df = df_kek.copy()
-    df['distance'] = df.apply(
+def add_time_features(df_kek):
+    """
+    Extract time related features.
+    :param df_kek: init dataframe
+    :return: dataframe with time features
+    """
+    df = pd.DataFrame([])
+    df['hour'] = df_kek['OrderedDate'].dt.hour
+    df['dow'] = df_kek['OrderedDate'].dt.dayofweek
+    df = pd.concat([pd.get_dummies(df['dow'], prefix='dow'), pd.get_dummies(df['hour'], prefix='hour')], axis=1)
+    return df
+
+
+def add_distance_features(df_kek):
+    """
+    Extract distance related features.
+    :param df_kek: init dataframe
+    :return: dataframe with distance features
+    """
+    df = pd.DataFrame([])
+    df['distance'] = df_kek.apply(
         lambda x: get_distance(x['latitude'], x['longitude'], x['del_latitude'], x['del_longitude']), axis=1)
-    df = df[['ETA', 'distance']]
+    df['distance_dest_from_center'] = df_kek.apply(
+        lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['del_latitude'], x['del_longitude']),
+        axis=1)
+    df['distance_start_from_center'] = df_kek.apply(
+        lambda x: get_distance(x['center_latitude'], x['center_longitude'], x['latitude'], x['longitude']), axis=1)
+    df = pd.concat([df, pd.get_dummies(df_kek['main_id_locality'], prefix='City')], axis=1)
+    return df
+
+
+def preprocess(df_kek):
+    """
+    Extract features from initial dataframe.
+    :param df_kek: init dataframe
+    :return: preprocessed dataframe
+    """
+    df = df_kek.copy()
+    df = pd.concat([df, add_time_features(df)], axis=1)
+    df = pd.concat([df, add_distance_features(df)], axis=1)
+    df.drop(['Id', 'main_id_locality', 'RTA', 'OrderedDate', 'latitude',
+             'del_latitude', 'longitude', 'del_longitude', 'RDA',
+             'ReadyForCollection', 'ClientCollected', 'GoodArrived',
+             'ready_latitude', 'ready_longitude', 'onway_latitude',
+             'onway_longitude', 'arrived_latitude', 'arrived_longitude',
+             'center_latitude', 'center_longitude', 'route', 'track'], axis=1, inplace=True, errors='ignore')
     return df
 
 
 def mean_absolute_percentage_error(y_true, y_pred):
+    """
+    MAPE metric eval.
+    :param y_true:
+    :param y_pred:
+    :return: MAPE
+    """
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
 
 class WeightedRegressor(BaseEstimator, RegressorMixin):
+    """
+    Weighted arithmetic mean regressor
+    """
 
     def __init__(self, weights=None):
         self.weights = weights
@@ -49,81 +108,101 @@ class WeightedRegressor(BaseEstimator, RegressorMixin):
 
 
 xgb_params = {
-    'seed': 1337,
-    'colsample_bytree': 1,
-    'silent': 1,
-    'subsample': 0.75,
-    'eta': 0.06,
-    'objective': 'reg:tweedie',
-    'max_depth': 5,
-    'gamma': 0,
-    'num_parallel_tree': 1,
-    'min_child_weight': 1,
-    'tree_methods': 'gpu_hist',
+    'colsample_bytree': 0.6821852734352154,
+    'gamma': 0.4553674559967951,
+    'learning_rate': 0.06310339310159835,
+    'max_depth': 12,
+    'min_child_weight': 2.6876210444837954,
     'n_estimators': 200,
-    'reg_alpha': 0.1,
+    'objective': 'reg:tweedie',
+    'reg_alpha': 0.05950096345795112,
+    'seed': 1337,
+    'subsample': 0.8358148287882489
 }
 
 lgb_params = {
-    'seed': 1337,
-    'colsample_bytree': 1,
-    'silent': 1,
-    'subsample': 0.75,
-    'eta': 0.06,
+    'colsample_bytree': 0.8422252658916799,
+    'learning_rate': 0.0445869385219306,
+    'max_depth': 12,
+    'min_child_weight': 0.4223370679383952,
+    'n_estimators': 280,
     'objective': 'tweedie',
-    'max_depth': 5,
-    'gamma': 0,
-    'min_child_weight': 0.19,
-    'n_estimators': 200,
-    'reg_alpha': 0.1,
-    'n_jobs': -1
+    'reg_alpha': 0.11493392438491513,
+    'seed': 1337,
+    'subsample': 0.752202953524499
 }
 
 cat_params = {
-    'silent': True,
-    'subsample': 0.8,
-    'eta': 0.035,
+    'l2_leaf_reg': 4.002663589178608,
+    'learning_rate': 0.09816790972650707,
+    'max_depth': 12,
+    'n_estimators': 260,
     'objective': 'MAE',
-    'depth': 6,
-    'n_estimators': 200,
     'random_state': 1337,
-    'l2_leaf_reg': 13,
-    'random_strength': 0.0001,
-    'thread_count': -1
+    'random_strength': 0.03565561790725354,
+    'silent': True,
+    'subsample': 0.8274371361968814
 }
 
-df_train = pd.read_csv('data/train.csv', date_parser=['OrderedDate'])
-df_val = pd.read_csv('data/validation.csv', date_parser=['OrderedDate'])
-df_test = pd.read_csv('data/test.csv', date_parser=['OrderedDate'])
 
-X_train = preprocess(df_train)
-y_train = df_train['RTA']
+def main():
+    logger.info('start reading...')
+    df_train = pd.read_csv('data/train.csv', parse_dates=['OrderedDate'])
+    df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
+    df_test_old = pd.read_csv('data/test_additional.csv', parse_dates=['OrderedDate', 'GoodArrived', 'ClientCollected'])
+    df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
 
-X_val = preprocess(df_val)
-y_val = df_val['RTA']
+    df_test_old['RTA'] = (df_test_old['GoodArrived'] - df_test_old['ClientCollected']).dt.seconds
 
-X_test = preprocess(df_test)
+    logger.info('end reading')
+    logger.info('start preprocessing...')
 
-estimators = [
-    ('xgb', XGBRegressor(**xgb_params)),
-    ('lgb', LGBMRegressor(**lgb_params)),
-    ('cat', CatBoostRegressor(**cat_params))
-]
+    X_train = preprocess(df_train)
+    y_train = df_train['RTA']
 
-final_estimator = WeightedRegressor()
+    X_val = preprocess(df_val)
+    y_val = df_val['RTA']
 
-stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=5, shuffle=False,
-                            random_state=None)
-steps = [('stack', stack),
-         ('final_estimator', final_estimator)]
-pipe = Pipeline(steps)
+    X_test_old = preprocess(df_test_old)
+    y_test_old = df_test_old['RTA']
 
-pipe.fit(X_train, y_train)
+    X_test = preprocess(df_test)
 
-y_pred = pipe.predict(X_val)
-print(mean_absolute_percentage_error(y_pred, y_val))
+    logger.info('end preprocessing.')
 
-y_test = pipe.predict(X_test)
-df_test['Prediction'] = y_test
-df_test = df_test[['Id', 'Prediction']]
-df_test.to_csv('data/submission.csv', index=None)
+    estimators = [
+        ('xgb', XGBRegressor(**xgb_params)),
+        ('lgb', LGBMRegressor(**lgb_params)),
+        ('cat', CatBoostRegressor(**cat_params))
+    ]
+
+    final_estimator = WeightedRegressor()
+
+    stack = StackingTransformer(estimators=estimators, variant='A', regression=True, n_folds=5, shuffle=False,
+                                random_state=None)
+    steps = [('stack', stack),
+             ('final_estimator', final_estimator)]
+    pipe = Pipeline(steps)
+
+    logger.info('start training...')
+
+    pipe.fit(X_train, y_train)
+
+    logger.info('end training.')
+
+    y_pred = pipe.predict(X_val)
+    logger.info(f'MAPE on valid: {mean_absolute_percentage_error(y_pred, y_val)}')
+
+    y_pred = pipe.predict(X_test_old)
+    logger.info(f'MAPE on old test: {mean_absolute_percentage_error(y_pred, y_test_old)}')
+
+    y_test = pipe.predict(X_test)
+    df_test['Prediction'] = y_test
+    df_test = df_test[['Id', 'Prediction']]
+    df_test.to_csv('data/submission.csv', index=None)
+
+    logger.info('the end!')
+
+
+if __name__ == '__main__':
+    main()
