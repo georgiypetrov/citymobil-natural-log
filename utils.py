@@ -82,16 +82,13 @@ def add_distance_features(df_kek):
     return df
 
 
-def preprocess(df_kek, crossroads=False, name=None):
+def preprocess(df_kek):
     """
     Extract features from initial dataframe.
     :param df_kek: init dataframe.
-    :param crossroads: True if use crossroads feature
     :param name: name of dataset.
     :return: preprocessed dataframe.
     """
-    if crossroads and not name:
-        raise AttributeError('Cannot find dataset name!')
     df = pd.DataFrame([])
     df['ETA'] = df_kek['ETA']
     df['EDA'] = df_kek['EDA']
@@ -140,7 +137,7 @@ class WeightedRegressor(BaseEstimator, RegressorMixin):
         return y
 
 
-def get_data(target='RTA', crossroads=False):
+def get_data(target='RTA'):
     """
     Read data and return preprocessed dataframe
     :param crossroads: True if use crossroads feature
@@ -157,15 +154,15 @@ def get_data(target='RTA', crossroads=False):
     logger.info('end reading')
     logger.info('start preprocessing...')
 
-    X_train = preprocess(df_train, crossroads, name='train')
+    X_train = preprocess(df_train)
     df_train['RTA_over_ETA'] = df_train['RTA'] / df_train['ETA']
     y_train = df_train[target]
 
-    X_val = preprocess(df_val, crossroads, name='validation')
+    X_val = preprocess(df_val)
     df_val['RTA_over_ETA'] = df_val['RTA'] / df_val['ETA']
     y_val = df_val['RTA']
 
-    X_test = preprocess(df_test, crossroads, name='test')
+    X_test = preprocess(df_test)
 
     logger.info('end preprocessing.')
 

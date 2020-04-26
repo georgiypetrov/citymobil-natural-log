@@ -11,13 +11,12 @@ from utils import xgb_params, lgb_params, cat_params, WeightedRegressor, mean_ab
     get_data
 
 
-def main(crossroads=False):
+def main():
     """
     :param crossroads: True if use crossroads feature
     :return:
     """
-    X_train, y_train, X_val, y_val, X_test, Test_ID, train_eta, val_eta, test_eta = get_data(crossroads=crossroads,
-                                                                                             target='RTA_over_ETA')
+    X_train, y_train, X_val, y_val, X_test, Test_ID, train_eta, val_eta, test_eta = get_data(target='RTA_over_ETA')
     estimators = [
         ('xgb', XGBRegressor(**xgb_params)),
         ('lgb', LGBMRegressor(**lgb_params)),
