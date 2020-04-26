@@ -2,8 +2,11 @@ from datetime import timedelta
 
 import numpy as np
 import pandas as pd
+from loguru import logger
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_X_y, check_array
+
+cities = [1078, 22390, 22430, 22438]
 
 
 def get_distance(lat1, lon1, lat2, lon2):
@@ -93,6 +96,7 @@ def preprocess(df_kek):
     df['ETA'] = df_kek['ETA']
     df['EDA'] = df_kek['EDA']
     df['ESP'] = df['EDA'] / df['ETA']
+    df['city_id'] = df_kek['main_id_locality']
     df = pd.concat([df, add_time_features(set_time_by_timezone(df_kek))], axis=1)
     df = pd.concat([df, add_distance_features(df_kek)], axis=1)
     return df
@@ -129,6 +133,57 @@ class WeightedRegressor(BaseEstimator, RegressorMixin):
 
         y = np.mean(X, axis=1)
         return y
+
+
+def get_data():
+    """
+    Read data and return preprocessed dataframe
+    :return: X_train, y_train, X_val, y_val, X_test, Test_ID
+    """
+    logger.info('start reading...')
+
+    df_train = pd.read_csv('data/train_with_arrived_error_q90.csv', parse_dates=['OrderedDate'])
+    df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
+    df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
+
+    df_train = pd.concat([df_train, df_val], axis=0)  # remove it if you want true validation score
+
+    logger.info('end reading')
+    logger.info('start preprocessing...')
+
+    X_train = preprocess(df_train)
+    y_train = df_train['RTA']
+
+    X_val = preprocess(df_val)
+    y_val = df_val['RTA']
+
+    X_test = preprocess(df_test)
+
+    logger.info('end preprocessing.')
+
+    return X_train, y_train, X_val, y_val, X_test, df_test['Id']
+
+
+def get_city_idxs():
+    """
+    Get city indexes mapping.
+    :return: dict with indexes
+    """
+    df_train = pd.read_csv('data/train_with_arrived_error_q90.csv', parse_dates=['OrderedDate'])
+    df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
+    df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
+
+    df_train = pd.concat([df_train, df_val], axis=0)  # remove it if you want true validation score
+
+    idxs = {}
+
+    for city in cities:
+        idxs[city] = {
+            'train': df_train['main_id_locality'] == city,
+            'val': df_val['main_id_locality'] == city,
+            'test': df_test['main_id_locality'] == city
+        }
+    return idxs
 
 
 xgb_params = {

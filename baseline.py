@@ -6,29 +6,12 @@ from sklearn.pipeline import Pipeline
 from vecstack import StackingTransformer
 from xgboost import XGBRegressor
 
-from utils import preprocess, xgb_params, lgb_params, cat_params, WeightedRegressor, mean_absolute_percentage_error
+from utils import xgb_params, lgb_params, cat_params, WeightedRegressor, mean_absolute_percentage_error, \
+    get_data
 
 
 def main():
-    logger.info('start reading...')
-    df_train = pd.read_csv('data/train_with_arrived_error_q90.csv', parse_dates=['OrderedDate'])
-    df_val = pd.read_csv('data/validation.csv', parse_dates=['OrderedDate'])
-    df_test = pd.read_csv('data/test.csv', parse_dates=['OrderedDate'])
-
-    df_train = pd.concat([df_train, df_val], axis=0)  # remove it if you want true validation score
-
-    logger.info('end reading')
-    logger.info('start preprocessing...')
-
-    X_train = preprocess(df_train)
-    y_train = df_train['RTA']
-
-    X_val = preprocess(df_val)
-    y_val = df_val['RTA']
-
-    X_test = preprocess(df_test)
-
-    logger.info('end preprocessing.')
+    X_train, y_train, X_val, y_val, X_test, Test_ID = get_data()
 
     estimators = [
         ('xgb', XGBRegressor(**xgb_params)),
@@ -54,8 +37,11 @@ def main():
     logger.info(f'MAPE on valid: {mean_absolute_percentage_error(y_val, y_pred)}')
 
     y_test = pipe.predict(X_test)
-    df_test['Prediction'] = y_test
-    df_test = df_test[['Id', 'Prediction']]
+
+    df = pd.DataFrame([])
+    df['Prediction'] = y_test
+    df['Id'] = Test_ID
+    df_test = df[['Id', 'Prediction']]
     df_test.to_csv('data/submission.csv', index=None)
 
     logger.info('the end!')
