@@ -31,10 +31,10 @@ def objective(params, keker):
     if keker is LGBMRegressor:
         params['num_leaves'] = 2 ** params['max_depth']
 
-    clf = keker(**params)
+    reg = keker(**params)
 
     estimators = [
-        ('clf', clf),
+        ('reg', reg),
     ]
 
     final_estimator = WeightedRegressor()
