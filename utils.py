@@ -62,7 +62,9 @@ def add_time_features(df_kek):
     df = pd.DataFrame([])
     df['hour'] = df_kek['OrderedDate'].dt.hour
     df['dow'] = df_kek['OrderedDate'].dt.dayofweek
-    df = pd.concat([pd.get_dummies(df['dow'], prefix='dow'), pd.get_dummies(df['hour'], prefix='hour')], axis=1)
+    df['weekend'] = (df['dow'] >= 6) | (df_kek['OrderedDate'] == '2020-02-22') | (
+            df_kek['OrderedDate'] == '2020-02-24') | (df_kek['OrderedDate'] == '2020-03-09') | (
+                            df_kek['OrderedDate'] >= '2020-03-30') | (df_kek['OrderedDate'] == '2020-03-07')
     return df
 
 
@@ -113,7 +115,9 @@ def preprocess(df_kek, crossroads=False, name=None):
     df['ETA'] = df_kek['ETA']
     df['EDA'] = df_kek['EDA']
     df['ESP'] = df['EDA'] / df['ETA']
+    df['EXZ'] = df['ETA'] / df['EDA']
     df['city_id'] = df_kek['main_id_locality']
+    df = pd.concat([df, pd.get_dummies(df['city_id'], prefix='city')], axis=1)
     df = pd.concat([df, add_time_features(set_time_by_timezone(df_kek))], axis=1)
     df = pd.concat([df, add_distance_features(df_kek)], axis=1)
 
