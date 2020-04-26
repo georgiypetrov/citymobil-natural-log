@@ -20,13 +20,13 @@ def main():
     logger.info('end reading')
     logger.info('start preprocessing...')
 
-    X_train = preprocess(df_train)
+    X_train = preprocess(df_train, name='train')
     y_train = df_train['RTA']
 
-    X_val = preprocess(df_val)
+    X_val = preprocess(df_val, name='validation')
     y_val = df_val['RTA']
 
-    X_test = preprocess(df_test)
+    X_test = preprocess(df_test, name='test')
 
     logger.info('end preprocessing.')
 
