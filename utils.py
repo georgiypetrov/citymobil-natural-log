@@ -91,7 +91,7 @@ def add_crossroads(df_kek, name):
     """
 
     crossroads = pd.read_csv(f'{name}_crossroads.csv')
-    df = df_kek.merge(crossroads, on='Id')
+    df = df_kek.merge(crossroads, on='Id', how='left')
 
     df['p200'].fillna(value=df['p200'].mean(), inplace=True)
     df['p500'].fillna(value=df['p500'].mean(), inplace=True)
