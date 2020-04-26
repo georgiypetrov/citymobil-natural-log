@@ -2,30 +2,25 @@ from datetime import timedelta
 
 import numpy as np
 import pandas as pd
-from loguru import logger
+from geopy import distance
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_X_y, check_array
 
 PROCESSED_DATA = 'processed_data'
 
 
-def get_distance(lat1, lon1, lat2, lon2):
+def get_distance(latitude, longitude, del_latitude, del_longitude):
     """
-    Get distance from two coordinates.
-    :param lat1: first latitude coord
-    :param lon1: first longitude coord
-    :param lat2: second latitude coord
-    :param lon2: second longitude coord
+    Get distance from start and destination coordinates.
+    :param latitude: latitude coord
+    :param longitude: longitude coord
+    :param del_latitude: destination latitude coord
+    :param del_longitude: destination longitude coord
     :return: distance in km
     """
-    KM = 6371.393
-    lat1, lon1, lat2, lon2 = map(np.deg2rad, [lat1, lon1, lat2, lon2])
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    a = np.sin(dlat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
-    c = 2 * np.arcsin(np.sqrt(a))
-    distance = KM * c
-    return distance
+    coord = (latitude, longitude)
+    del_coord = (del_latitude, del_longitude)
+    return distance.geodesic(coord, del_coord).km
 
 
 def set_city_time_by_timezone(df, city_id, hour_diff):
