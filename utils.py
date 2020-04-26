@@ -99,14 +99,15 @@ def add_crossroads(df_kek, name):
     return df
 
 
-def preprocess(df_kek, name=None):
+def preprocess(df_kek, crossroads=False, name=None):
     """
     Extract features from initial dataframe.
     :param df_kek: init dataframe.
+    :param crossroads: True if use crossroads feature
     :param name: name of dataset.
     :return: preprocessed dataframe.
     """
-    if not name:
+    if crossroads and not name:
         raise AttributeError('Cannot find dataset name!')
     df = pd.DataFrame([])
     df['ETA'] = df_kek['ETA']
@@ -116,10 +117,11 @@ def preprocess(df_kek, name=None):
     df = pd.concat([df, add_time_features(set_time_by_timezone(df_kek))], axis=1)
     df = pd.concat([df, add_distance_features(df_kek)], axis=1)
 
-    # Добавляем временно `Id`, чтобы правильно смержить перекрестки
-    df['Id'] = df_kek['Id']
-    df = add_crossroads(df, name=name)
-    df.drop(columns=['Id'], inplace=True)
+    if crossroads:
+        # Добавляем временно `Id`, чтобы правильно смержить перекрестки
+        df['Id'] = df_kek['Id']
+        df = add_crossroads(df, name=name)
+        df.drop(columns=['Id'], inplace=True)
     return df
 
 
@@ -156,9 +158,10 @@ class WeightedRegressor(BaseEstimator, RegressorMixin):
         return y
 
 
-def get_data():
+def get_data(crossroads=False):
     """
     Read data and return preprocessed dataframe
+    :param crossroads: True if use crossroads feature
     :return: X_train, y_train, X_val, y_val, X_test, Test_ID
     """
     logger.info('start reading...')
@@ -172,13 +175,13 @@ def get_data():
     logger.info('end reading')
     logger.info('start preprocessing...')
 
-    X_train = preprocess(df_train)
+    X_train = preprocess(df_train, crossroads)
     y_train = df_train['RTA']
 
-    X_val = preprocess(df_val)
+    X_val = preprocess(df_val, crossroads)
     y_val = df_val['RTA']
 
-    X_test = preprocess(df_test)
+    X_test = preprocess(df_test, crossroads)
 
     logger.info('end preprocessing.')
 

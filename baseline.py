@@ -1,3 +1,4 @@
+import fire
 import pandas as pd
 from catboost import CatBoostRegressor
 from lightgbm import LGBMRegressor
@@ -10,8 +11,12 @@ from utils import xgb_params, lgb_params, cat_params, WeightedRegressor, mean_ab
     get_data
 
 
-def main():
-    X_train, y_train, X_val, y_val, X_test, Test_ID = get_data()
+def main(crossroads=False):
+    """
+    :param crossroads: True if use crossroads feature
+    :return:
+    """
+    X_train, y_train, X_val, y_val, X_test, Test_ID = get_data(crossroads=crossroads)
 
     estimators = [
         ('xgb', XGBRegressor(**xgb_params)),
@@ -48,4 +53,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    fire.Fire(main)
