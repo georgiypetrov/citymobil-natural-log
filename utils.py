@@ -93,7 +93,7 @@ def preprocess(df_kek):
     df['ETA'] = df_kek['ETA']
     df['EDA'] = df_kek['EDA']
     df['ESP'] = df['EDA'] / df['ETA']
-    df = pd.concat([df, add_time_features(df_kek)], axis=1)
+    df = pd.concat([df, add_time_features(set_time_by_timezone(df_kek))], axis=1)
     df = pd.concat([df, add_distance_features(df_kek)], axis=1)
     return df
 
