@@ -94,6 +94,8 @@ def add_crossroads(df_kek, name):
     df = df_kek.merge(crossroads, on='Id')
 
     df['p200'].fillna(value=df['p200'].mean(), inplace=True)
+    df['p500'].fillna(value=df['p500'].mean(), inplace=True)
+    df['p1000'].fillna(value=df['p1000'].mean(), inplace=True)
     return df
 
 
