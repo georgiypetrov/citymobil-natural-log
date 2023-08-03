@@ -3,7 +3,7 @@ fire==0.3.1
 geopy==1.21.0
 numpy==1.18.3
 lightgbm==2.3.1
-loguru==0.4.1
+loguru==0.5.3
 pandas==1.0.3
 polyline==1.4.0
 scikit-learn==0.22.2.post1
